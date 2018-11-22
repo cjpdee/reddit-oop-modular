@@ -1,0 +1,80 @@
+.post__votes__downvote, .post__votes__upvote {
+  flex: 1 0 50%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+}
+
+.controls__wrap {
+  padding: 0.625em 1.25em;
+  background-color: darkgrey;
+}
+.controls__btn {
+  background-color: lightgrey;
+  color: white;
+}
+
+.display__wrap {
+  height: 100%;
+  background-color: #f4f4f4;
+  padding: 1.25em;
+}
+
+.post {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 1.25em;
+}
+.post__votes__wrap {
+  flex: 0 0 4em;
+  height: 4em;
+  display: flex;
+  flex-direction: column;
+}
+.post__votes__upvote {
+  background-color: orange;
+}
+.post__votes__downvote {
+  background-color: blue;
+}
+.post__main {
+  flex: 0 1 100%;
+  padding: 0.625em;
+  background-color: white;
+}
+.post__header {
+  margin: 0;
+}
+
+<<<<<<< HEAD
+.modal {
+  padding: 3.125em;
+  background-color: white;
+  border: 0.1875em solid black;
+  border-radius: 0.625em;
+}
+.modal__wrap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+.modal * {
+  display: block;
+}
+
+=======
+>>>>>>> aa7c57b0b640e178068527767eec812cae87d165
+/*# sourceMappingURL=style.css.map */

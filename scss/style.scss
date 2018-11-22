@@ -1,0 +1,94 @@
+@function em($pxval, $base: 16) {
+	@return ($pxval / $base) * 1em;
+}
+
+%voteButton {
+    flex: 1 0 50%;
+}
+
+* { box-sizing: border-box; }
+body {
+    min-height: 100vh;
+    margin: 0;
+}
+
+.controls {
+    &__wrap {
+        padding: em(10) em(20);
+        background-color: darkgrey;
+    }
+    &__btn {
+        background-color: lightgrey;
+        color: white;
+    }
+}
+
+.display__wrap {
+    height: 100%;
+    background-color: #f4f4f4;
+    padding: em(20);
+}
+
+.post {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: em(20);
+
+    &__votes {
+        &__wrap {
+            flex: 0 0 em(64);
+            height: em(64);
+            display: flex;
+            flex-direction: column;
+        }
+
+        &__upvote {
+            @extend %voteButton;
+            background-color: orange;
+        }
+        &__downvote {
+            @extend %voteButton;
+            background-color: blue;
+        }
+    }
+
+    &__main {
+        flex: 0 1 100%;
+        padding: em(10);
+        background-color: white;
+    }
+
+    &__header {
+        margin: 0;
+    }
+}
+<<<<<<< HEAD
+
+
+.modal {
+    padding: em(50);
+
+    background-color: white;
+    border: em(3) solid black;
+    border-radius: em(10);
+
+    &__wrap {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        background-color: rgba(black,0.6);
+    }
+    
+    & * {display: block;}
+    
+}
+=======
+>>>>>>> aa7c57b0b640e178068527767eec812cae87d165
