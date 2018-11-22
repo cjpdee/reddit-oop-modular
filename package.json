@@ -1,5 +1,7 @@
 {
   "devDependencies": {
+    "browser-sync": "^2.26.3",
+    "browser-sync-webpack-plugin": "2.0.1",
     "laravel-mix": "^2.1.14"
   },
   "scripts": {

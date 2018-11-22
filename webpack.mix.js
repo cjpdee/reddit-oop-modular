@@ -11,7 +11,13 @@ let mix = require('laravel-mix');
  |
  */
 
-mix.js('src/*.js', 'dist/').sass('src/app.scss', 'dist/');
+mix.js('src/app.js', 'dist/').sass('src/app.scss', 'dist/')
+	.copyDirectory(`src/index.html`, `dist/`)
+	.browserSync({
+        proxy: '',
+        server: 'dist/'
+    })
+    .setPublicPath('dist');
 
 // Full API
 // mix.js(src, output);
