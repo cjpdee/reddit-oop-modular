@@ -7,13 +7,13 @@
 =============================
 */
 // global
-$usersDropdown.on('change',function(e) {
+$("[hook-js=select-user]").on('change',function(e) {
     let thisUserName = $(e.currentTarget).val();
     currentUser = users.find(user => user.username == thisUserName);
     console.log(currentUser);
 });
 
-$newPostBtn.on('click',function() {
+$("[hook-js=new-post]").on('click',function() {
     if (!currentUser) {
         console.log("No user is logged in");
     } else {

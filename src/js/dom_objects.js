@@ -1,3 +1,4 @@
+export default (function(){
 /*
 ============================
 ----------- DOM ------------
@@ -6,10 +7,7 @@
 
 // COMPONENTS
 
-var $display = $("[hook-js=display]");
-var $usersDropdown = $("[hook-js=select-user]");
-var $newPostBtn = $("[hook-js=new-post]");
-var $modal = $("[hook-js=modal]");
+
 
 function drawPost(post_id) {
     var post = getThisPost(post_id);
@@ -93,3 +91,5 @@ var NewPostModal = function() {
 }
 
 function NewUserModal() {}
+
+})()
