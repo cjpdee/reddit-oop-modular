@@ -7,8 +7,9 @@ var store = {
     // USER
     getUsers : ()=>users,
     getCurrentUser : ()=> currentUser,
-    setCurrentUser : function(username) {
-        currentUser : users[users.indexOf(username)];
+    setCurrentUser : function(username) { // this thing isn't working
+        console.log('x',users.indexOf("myG"));
+        currentUser = users[users.indexOf(username)];
     },
     // POSTS
     getPostCount : ()=> post_count,

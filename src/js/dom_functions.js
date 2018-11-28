@@ -1,19 +1,20 @@
 // COMPONENT MACROS
 
-import DOM from './dom_objects';
-
+import DOMponents from './dom_objects';
+import Admin from './user_adminFunctions';
+import store from './store';
 // function sortPosts(sortType) {}
-export default (function() {
-DOM = {
+var DOMFuncs;
+export default DOMFuncs = {
     drawAllPosts : function(sortedPosts) {
-        sortedPosts.forEach(function(post) {
-            DOM.drawPost(post.post_id);
+        Admin.getAllPosts().forEach(function(post) {
+            DOMponents.drawPost(post.post_id);
         });
     },
 
     populateUsersDropdown : function () {
         store.getUsers().forEach(function(user) {
-            $usersDropdown.append(
+            $("[hook-js=select-user]").append(
                 $(`
                     <option value="${user.username}">
                         ${user.username}
@@ -23,5 +24,3 @@ DOM = {
         });
     }
 }
-// this page is fucked
-})()

@@ -2,11 +2,12 @@
 // import F from './js/dom_objects';
 // import './js/_global.js';
 
+import $ from './js/jquery';
 
 // variable store
 import store from './js/store';
 import Admin from './js/user_adminFunctions';
-import DOM from './js/dom_objects';
+import DOMponents from './js/dom_objects';
 import DOMFuncs from './js/dom_functions';
 
 // import {getThisUser} from './js/store';
@@ -14,9 +15,9 @@ import DOMFuncs from './js/dom_functions';
 
 Admin.createUser("myUser","myPass");
 Admin.createUser("myG","myPass");
-let currentUser = Admin.findUser("myUser");
-currentUser.createPost('x','y','z');
-currentUser.createPost('12','3','4');
+let currentUser = Admin.findUser("myG");
+currentUser.createPost('CoolSub','My G\'s Post','What\'s up all the gs of the world');
+currentUser.createPost('CoolerSub','GGGGG','ggggggggggggggggggggg');
 currentUser.createComment(1,'comment data');
 currentUser.upvote('post',0);
 //Admin.findUser("myG").upvote('post',1);
@@ -27,8 +28,18 @@ console.log('store',store);
 console.log(store.getUsers());
 console.log(store.incrementPostCount());
 
-Admin.populateUsersDropdown;
+DOMFuncs.populateUsersDropdown();
 DOMFuncs.drawAllPosts(store.getUsers());
+
+$("[hook-js=select-user]").on("change",function() {
+    store.setCurrentUser(this.value);
+})
+
+$("[hook-js=new-post]").on("click",function() {
+    DOMponents.NewPostModal.draw();
+})
+
+
 
 /*
 how to make this shiet work:

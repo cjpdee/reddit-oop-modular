@@ -1,4 +1,8 @@
-export default (function(){
+import Admin from './user_adminFunctions';
+import store from './store';
+
+var DOMponents;
+export default DOMponents = {
 /*
 ============================
 ----------- DOM ------------
@@ -9,10 +13,11 @@ export default (function(){
 
 
 
-function drawPost(post_id) {
-    var post = getThisPost(post_id);
+drawPost: function(post_id) {
+    var post = Admin.getThisPost(post_id);
+    console.log(post);
     
-    $display.append($(`
+    $("[hook-js=display]").append($(`
         <div class="post" data-post-id="${post.post_id}">
             <div class="post__votes__wrap">
                 <button class="post__votes__upvote">${post.upvotes}</button>
@@ -40,14 +45,14 @@ function drawPost(post_id) {
             </div>
         </div>
     `));
-}
+},
 
 
-var NewPostModal = function() {
-    var $currentModal;
-    this.draw = function() {
+NewPostModal : {
+    draw : function() {
+        console.log(store.getCurrentUser());
         $("body").append($(`
-            <section class="modal__wrap" data-user="${currentUser.username}" modal-js="modal">
+            <section class="modal__wrap" data-user="${store.getCurrentUser().username}" modal-js="modal">
                 <div class="modal">
                     <h1>New Post</h1>
                     <form onSubmit="e.preventDefault">
@@ -63,22 +68,22 @@ var NewPostModal = function() {
             </section>
         `));
         $(`[modal-js=modal]`).on('click',function(e){
-            currentUser.newPost.delete();
+            store.getCurrentUser().newPost.delete();
         }).children().click(function(){
             return false;
         });
         $(`[modal-js=submit]`).on('click',function(e){
             e.preventDefault();
-            currentUser.newPost.submit();
+            store.getCurrentUser().newPost.submit();
         });
-    }
+    },
 
-    this.delete = function() {
+    delete : function() {
         $(`[modal-js=modal]`).remove();
-        delete currentUser.newPost;
-    }
+        delete store.getCurrentUser().newPost;
+    },
 
-    this.submit = function() {
+    submit : function() {
         console.log(this);
         let $form = $(`[modal-js=modal]`).children().children("form");
         let input = {
@@ -88,8 +93,8 @@ var NewPostModal = function() {
         }
         console.log(input);
     }
+},
+
+NewUserModal : function() {}
+
 }
-
-function NewUserModal() {}
-
-})()
