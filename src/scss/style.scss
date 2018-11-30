@@ -4,6 +4,7 @@
 
 %voteButton {
     flex: 1 0 50%;
+    font-weight: 900;
 }
 
 * { box-sizing: border-box; }
@@ -32,7 +33,7 @@ body {
 .post {
     display: flex;
     justify-content: flex-start;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: em(20);
 
     &__votes {
@@ -61,6 +62,20 @@ body {
 
     &__header {
         margin: 0;
+    }
+
+    &__content {
+        display: none;
+        input[name=showPost]:checked + & {
+            display: block;
+        }
+    }
+
+    &__comments {
+        display: none;
+        input[name=showComments]:checked ~ & {
+            display: block;
+        }
     }
 }
 

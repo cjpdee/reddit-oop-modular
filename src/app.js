@@ -19,14 +19,15 @@ let currentUser = Admin.findUser("myG");
 currentUser.createPost('CoolSub','My G\'s Post','What\'s up all the gs of the world');
 currentUser.createPost('CoolerSub','GGGGG','ggggggggggggggggggggg');
 currentUser.createComment(1,'comment data');
-currentUser.upvote('post',0);
+currentUser.createComment(1,'my g this is sick');
+currentUser.createComment(2,'commf dfsds2');
+// currentUser.upvote('post',1);
 //Admin.findUser("myG").upvote('post',1);
 //Admin.findUser("myG").upvote('comment',1);
 
-console.log('admin',Admin);
-console.log('store',store);
-console.log(store.getUsers());
-console.log(store.incrementPostCount());
+// console.log('admin',Admin);
+// console.log('store',store);
+// console.log(store.getUsers());
 
 DOMFuncs.populateUsersDropdown();
 DOMFuncs.drawAllPosts(store.getUsers());
@@ -39,39 +40,39 @@ $("[hook-js=new-post]").on("click",function() {
     DOMponents.NewPostModal.draw();
 })
 
+$("[hook-js=display]").on("click","[post-js=create-comment]",function() {
+    let thisPostId = $(this).parents(".post").first().data("post-id");
+    let thisPost   = Admin.getThisPost(thisPostId)
+    DOMponents.NewCommentModal.draw(thisPost);
+})
 
+$("[hook-js=display]").on("click","[post-js=upvote]",function() {
+    // TO DO: check if user has up-or-downvoted on post
+    // and if they have done the opposite already, remove that
+    // up/downvote
+    let thisPostId = $(this).parents(".post").first().data("post-id");
+    let thisPost   = Admin.getThisPost(thisPostId);
+    currentUser.upvote('post',thisPostId);
+    $(this).text(thisPost.upvotes);
+})
 
-/*
-how to make this shiet work:
-instead of trying to directly change variables
-try making functions which change the values
+$("[hook-js=display]").on("click","[post-js=downvote]",function() {
+    // TO DO: check if user has up-or-downvoted on post
+    // and if they have done the opposite already, remove that
+    // up/downvote
+    let thisPostId = $(this).parents(".post").first().data("post-id");
+    let thisPost   = Admin.getThisPost(thisPostId);
+    currentUser.downvote('post',thisPostId);
+    $(this).text(thisPost.downvotes);
+})
 
-e.g getUsers(), getUser(currentUser).createPost()
-incrementPostCount()
-incrementCommentCount()
+// // modal event listeners
+$(document).on('click',"[modal-js=modal]",function(){
+    $(`[modal-js=modal]`).remove();
+})
 
+$(document).on('click',"[modal-js=modal] > div",function(){
+    return false;
+});
 
-
-*/
-
-
-// Admin.createUser("lol","p");
-// var l = new User('name','pass');
-// console.log(Admin);
-// console.log(l);
-
-
-
-
-
-
-// Admin.createUser("somename","somepass");
-//var l = new Data.User();
-// console.log(l);
-//user[1].createPost("r","t","c");
-// Admin.createUser('name','pass');
-//console.log('something');
-//import * as thing from '/js/user_adminFunctions';
-// import 'js/dom_objects.js';
-// import 'js/dom_functions.js';
-// import 'js/_global.js';
+// $("input[type=checkbox]").parent().on('change',function(){return false})

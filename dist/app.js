@@ -83,15 +83,13 @@ var store = {
     },
     setCurrentUser: function setCurrentUser(username) {
         // this thing isn't working
-        console.log('x', users.map(function (User) {
-            return User.username == username;
-        }));
-        console.log('y', users.map(function (e) {
+        var foundUserIndex = users.map(function (e) {
             if (e.username == username) {
                 return e.username;
             }
-        }));
-        currentUser = users[users.indexOf(username)];
+        }).indexOf(username);
+        currentUser = users[foundUserIndex];
+        console.log("Current user set: ", currentUser);
     },
     // POSTS
     getPostCount: function getPostCount() {
@@ -105,7 +103,7 @@ var store = {
         return comment_count;
     },
     incrementCommentCount: function incrementCommentCount() {
-        return comment_count;
+        return comment_count++;
     }
 };
 
@@ -224,23 +222,26 @@ var DOMponents;
 
     drawPost: function drawPost(post_id) {
         var post = __WEBPACK_IMPORTED_MODULE_0__user_adminFunctions__["a" /* default */].getThisPost(post_id);
-        console.log(post);
+        //console.log(post);
 
-        $("[hook-js=display]").append($('\n        <div class="post" data-post-id="' + post.post_id + '">\n            <div class="post__votes__wrap">\n                <button class="post__votes__upvote">' + post.upvotes + '</button>\n                <button class="post__votes__downvote">' + post.downvotes + '</button>\n            </div>\n            <div class="post__main">\n                <h3 class="post__header">' + post.title + '</h3>\n                <div class="post__details">\n                    <span class="post__detail">' + post.subreddit + '</span>\n                    <span class="post__detail">' + post.user + '</span>\n                    <span class="post__detail">' + post.date_posted + '</span>\n                </div>\n                <div class="post__controls">\n                    <span>\n                        <label for="showPost">Show Post</label>\n                        <input type="checkbox" name="showPost">\n                    </span>\n                    <span>\n                        <label for="showComments">Show Comments</label>\n                        <input type="checkbox" name="showComments">\n                    </span>\n                    <button class="post__controls__btn">Post Comment</button>\n\n                </div>\n            </div>\n        </div>\n    '));
+        $("[hook-js=display]").append($('\n        <div class="post" data-post-id="' + post.post_id + '">\n            <div class="post__votes__wrap">\n                <button class="post__votes__upvote" post-js="upvote">' + post.upvotes + '</button>\n                <button class="post__votes__downvote" post-js="downvote">' + post.downvotes + '</button>\n            </div>\n            <div class="post__main">\n                <h3 class="post__header">' + post.title + '</h3>\n                <div class="post__details">\n                    <span class="post__detail">' + post.subreddit + '</span>\n                    <span class="post__detail">' + post.user + '</span>\n                    <span class="post__detail">Date posted: \n                        ' + post.date_posted.getDate() + '.' + post.date_posted.getMonth() + '.' + post.date_posted.getFullYear() + '\n                        at \n                        ' + post.date_posted.getHours() + ':' + post.date_posted.getMinutes() + '\n                    </span>\n                </div>\n                <div class="post__controls">\n                    <span>\n                        <label for="showPost-' + post.post_id + '">Show Post</label>\n                        <input type="checkbox" name="showPost" id="showPost-' + post.post_id + '">\n                        <div class="post__content">\n                            ' + post.content + '\n                            <div>\n                                <label for="showComments-' + post.post_id + '">Show Comments</label>\n                                <input type="checkbox" name="showComments" id="showComments-' + post.post_id + '">\n                                <button class="post__controls__btn" post-js="create-comment">Post Comment</button>\n                                <div class="post__comments">\n                                    ' + post.comments.map(function (comment) {
+            return '<span>' + comment.content + '</span>';
+        }).join('<br />') + '\n                                </div>\n                            </div>\n                        </div>\n                    </span>\n                </div>\n                \n            </div>\n        </div>\n    '));
     },
 
     NewPostModal: {
         draw: function draw() {
             console.log(__WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser());
-            $("body").append($('\n            <section class="modal__wrap" data-user="' + __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().username + '" modal-js="modal">\n                <div class="modal">\n                    <h1>New Post</h1>\n                    <form onSubmit="e.preventDefault">\n                        <label for="title">Title</label>\n                        <input type="text" id="title">\n                        <label for="sub">Subreddit</label>\n                        <input type="text" id="sub">\n                        <label for="content">Content</label>\n                        <textarea name="" id="content" cols="30" rows="10"></textarea>\n                        <button modal-js="submit">Submit</button>\n                    </form>\n                </div>\n            </section>\n        '));
-            $('[modal-js=modal]').on('click', function (e) {
-                __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().newPost.delete();
-            }).children().click(function () {
-                return false;
-            });
-            $('[modal-js=submit]').on('click', function (e) {
+            $("body").append($('\n            <section class="modal__wrap" data-user="' + __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().username + '" modal-js="modal">\n                <div class="modal">\n                    <h1>New Post</h1>\n                    <form onSubmit="e.preventDefault">\n                        <label for="title">Title</label>\n                        <input type="text" id="title">\n                        <label for="sub">Subreddit</label>\n                        <input type="text" id="sub">\n                        <label for="content">Content</label>\n                        <textarea name="" id="content" cols="30" rows="10"></textarea>\n                        <button modal-js="submit-post">Submit</button>\n                    </form>\n                </div>\n            </section>\n        '));
+            $('[modal-js=submit-post]').on('click', function (e) {
                 e.preventDefault();
-                __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().newPost.submit();
+                console.log($("#sub").val(), $("#title").val(), $("#content").val());
+
+                var thisPostId = __WEBPACK_IMPORTED_MODULE_0__user_adminFunctions__["a" /* default */].getThisPost(__WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().createPost($("#sub").val(), $("#title").val(), $("#content").val())).post_id;
+                console.log(__WEBPACK_IMPORTED_MODULE_0__user_adminFunctions__["a" /* default */].getAllPosts());
+                DOMponents.drawPost(thisPostId);
+                $('[modal-js=modal]').remove();
+                // (subreddit,title,content)
             });
         },
 
@@ -261,7 +262,23 @@ var DOMponents;
         }
     },
 
-    NewUserModal: function NewUserModal() {}
+    NewCommentModal: {
+        draw: function draw(post) {
+            console.log(__WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser());
+            $("body").append($('\n            <section class="modal__wrap" data-user="' + __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().username + '" modal-js="modal">\n                <div class="modal">\n                    <h1>New Comment : Post ' + post.post_id + '</h1>\n                    <form onSubmit="e.preventDefault">\n                        <label for="content">Content</label>\n                        <textarea name="" id="content" cols="30" rows="10"></textarea>\n                        <button modal-js="submit-comment">Submit</button>\n                    </form>\n                </div>\n            </section>\n        '));
+            $('[modal-js=submit-comment]').on('click', function (e) {
+                e.preventDefault();
+                console.log($("#content").val());
+
+                var thisCommentId = __WEBPACK_IMPORTED_MODULE_0__user_adminFunctions__["a" /* default */].getThisComment(__WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().createComment(post.post_id, $("#content").val())).comment_id;
+                console.log(__WEBPACK_IMPORTED_MODULE_0__user_adminFunctions__["a" /* default */].getAllComments());
+                //DOMponents.drawPost(post.post_id);
+                $('[modal-js=modal]').remove();
+                $('[data-post-id=' + post.post_id + ']').remove();
+                DOMponents.drawPost(post.post_id);
+            });
+        }
+    }
 
 });
 
@@ -306,14 +323,15 @@ var currentUser = __WEBPACK_IMPORTED_MODULE_2__js_user_adminFunctions__["a" /* d
 currentUser.createPost('CoolSub', 'My G\'s Post', 'What\'s up all the gs of the world');
 currentUser.createPost('CoolerSub', 'GGGGG', 'ggggggggggggggggggggg');
 currentUser.createComment(1, 'comment data');
-currentUser.upvote('post', 0);
+currentUser.createComment(1, 'my g this is sick');
+currentUser.createComment(2, 'commf dfsds2');
+// currentUser.upvote('post',1);
 //Admin.findUser("myG").upvote('post',1);
 //Admin.findUser("myG").upvote('comment',1);
 
-console.log('admin', __WEBPACK_IMPORTED_MODULE_2__js_user_adminFunctions__["a" /* default */]);
-console.log('store', __WEBPACK_IMPORTED_MODULE_1__js_store__["a" /* default */]);
-console.log(__WEBPACK_IMPORTED_MODULE_1__js_store__["a" /* default */].getUsers());
-console.log(__WEBPACK_IMPORTED_MODULE_1__js_store__["a" /* default */].incrementPostCount());
+// console.log('admin',Admin);
+// console.log('store',store);
+// console.log(store.getUsers());
 
 __WEBPACK_IMPORTED_MODULE_4__js_dom_functions__["a" /* default */].populateUsersDropdown();
 __WEBPACK_IMPORTED_MODULE_4__js_dom_functions__["a" /* default */].drawAllPosts(__WEBPACK_IMPORTED_MODULE_1__js_store__["a" /* default */].getUsers());
@@ -326,35 +344,42 @@ __WEBPACK_IMPORTED_MODULE_0__js_jquery___default()("[hook-js=new-post]").on("cli
     __WEBPACK_IMPORTED_MODULE_3__js_dom_objects__["a" /* default */].NewPostModal.draw();
 });
 
-/*
-how to make this shiet work:
-instead of trying to directly change variables
-try making functions which change the values
+__WEBPACK_IMPORTED_MODULE_0__js_jquery___default()("[hook-js=display]").on("click", "[post-js=create-comment]", function () {
+    var thisPostId = __WEBPACK_IMPORTED_MODULE_0__js_jquery___default()(this).parents(".post").first().data("post-id");
+    var thisPost = __WEBPACK_IMPORTED_MODULE_2__js_user_adminFunctions__["a" /* default */].getThisPost(thisPostId);
+    __WEBPACK_IMPORTED_MODULE_3__js_dom_objects__["a" /* default */].NewCommentModal.draw(thisPost);
+});
 
-e.g getUsers(), getUser(currentUser).createPost()
-incrementPostCount()
-incrementCommentCount()
+__WEBPACK_IMPORTED_MODULE_0__js_jquery___default()("[hook-js=display]").on("click", "[post-js=upvote]", function () {
+    // TO DO: check if user has up-or-downvoted on post
+    // and if they have done the opposite already, remove that
+    // up/downvote
+    var thisPostId = __WEBPACK_IMPORTED_MODULE_0__js_jquery___default()(this).parents(".post").first().data("post-id");
+    var thisPost = __WEBPACK_IMPORTED_MODULE_2__js_user_adminFunctions__["a" /* default */].getThisPost(thisPostId);
+    currentUser.upvote('post', thisPostId);
+    __WEBPACK_IMPORTED_MODULE_0__js_jquery___default()(this).text(thisPost.upvotes);
+});
 
+__WEBPACK_IMPORTED_MODULE_0__js_jquery___default()("[hook-js=display]").on("click", "[post-js=downvote]", function () {
+    // TO DO: check if user has up-or-downvoted on post
+    // and if they have done the opposite already, remove that
+    // up/downvote
+    var thisPostId = __WEBPACK_IMPORTED_MODULE_0__js_jquery___default()(this).parents(".post").first().data("post-id");
+    var thisPost = __WEBPACK_IMPORTED_MODULE_2__js_user_adminFunctions__["a" /* default */].getThisPost(thisPostId);
+    currentUser.downvote('post', thisPostId);
+    __WEBPACK_IMPORTED_MODULE_0__js_jquery___default()(this).text(thisPost.downvotes);
+});
 
+// // modal event listeners
+__WEBPACK_IMPORTED_MODULE_0__js_jquery___default()(document).on('click', "[modal-js=modal]", function () {
+    __WEBPACK_IMPORTED_MODULE_0__js_jquery___default()('[modal-js=modal]').remove();
+});
 
-*/
+__WEBPACK_IMPORTED_MODULE_0__js_jquery___default()(document).on('click', "[modal-js=modal] > div", function () {
+    return false;
+});
 
-// Admin.createUser("lol","p");
-// var l = new User('name','pass');
-// console.log(Admin);
-// console.log(l);
-
-
-// Admin.createUser("somename","somepass");
-//var l = new Data.User();
-// console.log(l);
-//user[1].createPost("r","t","c");
-// Admin.createUser('name','pass');
-//console.log('something');
-//import * as thing from '/js/user_adminFunctions';
-// import 'js/dom_objects.js';
-// import 'js/dom_functions.js';
-// import 'js/_global.js';
+// $("input[type=checkbox]").parent().on('change',function(){return false})
 
 /***/ }),
 /* 5 */
@@ -2319,6 +2344,10 @@ User.prototype = {
         };
         this.posts.push(post);
         __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].incrementPostCount();
+        return post.post_id;
+    },
+    deletePost: function deletePost(post_id) {
+        this.posts.pop(post_id);
     },
     createComment: function createComment(post_id, content) {
         var comment = {
@@ -2332,6 +2361,7 @@ User.prototype = {
         };
         this.comments.push(comment);
         __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].incrementCommentCount();
+        console.log('this post', __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(post_id));
 
         // pass this comment to the post it's linked to
         //Admin.getThisPost(post_id).comments.push(comment);
@@ -2339,6 +2369,7 @@ User.prototype = {
         __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(post_id).comments.push(this.comments.find(function (item) {
             return item.comment_id == comment.comment_id;
         }));
+        return comment.comment_id;
     },
     downvotePost: function downvotePost(post_id) {
         if (this.votes.down.find(function (downvotedPost) {
@@ -2368,22 +2399,46 @@ User.prototype = {
             var thisThing = void 0;
             switch (type) {
                 case 'post':
-                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(thing_id);
+                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(thing_id);break;
                 case 'comment':
-                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisComment(thing_id);
+                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisComment(thing_id);break;
             }
             if (!thisThing) {
                 console.log('That ' + type + ' doesn\'t exist!');
                 return;
             }
+            console.log(type);
             console.log("upvote()", thisThing);
             thisThing.upvotes++;
-            this.votes.up.push(thing_id);
+            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getCurrentUser().votes.up.push(thing_id);
             console.log('this post was upvoted', thisThing);
         }
     },
 
-    downvote: function downvote(type, thing_id) {}
+    downvote: function downvote(type, thing_id) {
+        if (this.votes.down.find(function (downvoted) {
+            return downvoted == thing_id;
+        })) {
+            console.log("this user has already voted on this " + type);
+            return;
+        } else {
+            var thisThing = void 0;
+            switch (type) {
+                case 'post':
+                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(thing_id);break;
+                case 'comment':
+                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisComment(thing_id);break;
+            }
+            if (!thisThing) {
+                console.log('That ' + type + ' doesn\'t exist!');
+                return;
+            }
+            console.log("downvote()", thisThing);
+            thisThing.downvotes++;
+            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getCurrentUser().votes.down.push(thing_id);
+            console.log('this post was downvoted', thisThing);
+        }
+    }
 };
 
 /***/ }),

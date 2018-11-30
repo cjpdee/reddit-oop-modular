@@ -8,20 +8,20 @@ var store = {
     getUsers : ()=>users,
     getCurrentUser : ()=> currentUser,
     setCurrentUser : function(username) { // this thing isn't working
-        console.log('x',users.map(User => User.username == username));
-        console.log('y',users.map(function(e) {
+        let foundUserIndex = users.map(function(e) {
             if(e.username == username) {
                 return e.username
             }
-        }));
-        currentUser = users[users.indexOf(username)];
+        }).indexOf(username);
+        currentUser = users[foundUserIndex];
+        console.log("Current user set: ",currentUser);
     },
     // POSTS
     getPostCount : ()=> post_count,
     incrementPostCount : ()=> post_count++,
     
     getCommentCount : ()=> comment_count,
-    incrementCommentCount : ()=> comment_count
+    incrementCommentCount : ()=> comment_count++
 }
 
 export default store;

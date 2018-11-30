@@ -29,6 +29,10 @@ User.prototype = {
         }
         this.posts.push(post);
         store.incrementPostCount();
+        return post.post_id
+    },
+    deletePost : function(post_id) {
+        this.posts.pop(post_id)
     },
     createComment : function(post_id,content) {
         let comment = {
@@ -42,6 +46,7 @@ User.prototype = {
         }
         this.comments.push(comment);
         store.incrementCommentCount();
+        console.log('this post',Admin.getThisPost(post_id));
 
         // pass this comment to the post it's linked to
         //Admin.getThisPost(post_id).comments.push(comment);
@@ -49,6 +54,7 @@ User.prototype = {
         Admin.getThisPost(post_id).comments.push(
             this.comments.find(item => item.comment_id == comment.comment_id)
         );
+        return comment.comment_id
     },
     downvotePost : function(post_id) {
         if (this.votes.down.find(downvotedPost => downvotedPost == post_id)) {
@@ -71,19 +77,39 @@ User.prototype = {
         } else {
             let thisThing;
             switch (type) {
-                case 'post'   : thisThing = Admin.getThisPost(thing_id);
-                case 'comment': thisThing = Admin.getThisComment(thing_id);
+                case 'post'    : thisThing = Admin.getThisPost(thing_id); break
+                case 'comment' : thisThing = Admin.getThisComment(thing_id); break
             }
             if(!thisThing) {
                 console.log(`That ${type} doesn't exist!`);
                 return
             }
+            console.log(type);
             console.log("upvote()",thisThing);
             thisThing.upvotes++;
-            this.votes.up.push(thing_id);
+            store.getCurrentUser().votes.up.push(thing_id);
             console.log('this post was upvoted',thisThing);
         }
     },
 
-    downvote : function(type,thing_id) {}
+    downvote : function(type,thing_id) {
+        if (this.votes.down.find(downvoted => downvoted == thing_id)) {
+            console.log("this user has already voted on this " + type);
+            return
+        } else {
+            let thisThing;
+            switch (type) {
+                case 'post'    : thisThing = Admin.getThisPost(thing_id); break
+                case 'comment' : thisThing = Admin.getThisComment(thing_id); break
+            }
+            if(!thisThing) {
+                console.log(`That ${type} doesn't exist!`);
+                return
+            }
+            console.log("downvote()",thisThing);
+            thisThing.downvotes++;
+            store.getCurrentUser().votes.down.push(thing_id);
+            console.log('this post was downvoted',thisThing);
+        }
+    }
 }
