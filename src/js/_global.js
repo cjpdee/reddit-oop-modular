@@ -26,16 +26,6 @@ $("[hook-js=new-post]").on('click',function() {
 });
 
 
-
-
-
-
-function init() {
-    // drawAllPosts()
-    // set user
-}
-
-
 populateUsersDropdown();
 
 

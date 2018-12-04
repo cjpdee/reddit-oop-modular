@@ -29,7 +29,7 @@ User.prototype = {
         }
         this.posts.push(post);
         store.incrementPostCount();
-        return post.post_id
+        return post
     },
     deletePost : function(post_id) {
         this.posts.pop(post_id)

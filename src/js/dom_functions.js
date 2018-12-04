@@ -8,7 +8,7 @@ var DOMFuncs;
 export default DOMFuncs = {
     drawAllPosts : function(sortedPosts) {
         Admin.getAllPosts().forEach(function(post) {
-            DOMponents.drawPost(post.post_id);
+            DOMponents.insertTop(DOMponents.drawPost(post.post_id));
         });
     },
 
