@@ -237,7 +237,7 @@ var DOMponents;
         var post = __WEBPACK_IMPORTED_MODULE_0__user_adminFunctions__["a" /* default */].getThisPost(post_id);
 
         var renderedPost = $('\n            <div class="post" data-post-id="' + post.post_id + '">\n                <div class="post__votes__wrap">\n                    <button class="post__votes__upvote" post-js="upvote">' + post.upvotes + '</button>\n                    <button class="post__votes__downvote" post-js="downvote">' + post.downvotes + '</button>\n                </div>\n                <div class="post__main">\n                    <h3 class="post__header">' + post.title + '</h3>\n                    <div class="post__details">\n                        <span class="post__detail">' + post.subreddit + '</span>\n                        <span class="post__detail">' + post.user + '</span>\n                        <span class="post__detail">Date posted: \n                            ' + post.date_posted.getDate() + '.' + post.date_posted.getMonth() + '.' + post.date_posted.getFullYear() + '\n                            at \n                            ' + post.date_posted.getHours() + ':' + post.date_posted.getMinutes() + '\n                        </span>\n                    </div>\n                    <div class="post__controls">\n                        <span>\n                            <label for="showPost-' + post.post_id + '">Show Post</label>\n                            <input type="checkbox" name="showPost" id="showPost-' + post.post_id + '">\n                            <div class="post__content">\n                                ' + post.content + '\n                                <div>\n                                    <label for="showComments-' + post.post_id + '">Show Comments</label>\n                                    <input type="checkbox" name="showComments" id="showComments-' + post.post_id + '">\n                                    <button class="post__controls__btn" post-js="create-comment">Post Comment</button>\n                                    <div class="post__comments">\n                                        ' + post.comments.map(function (comment) {
-            return '<span>' + comment.content + '</span>';
+            return '<span><strong>' + comment.user + ': </strong>' + comment.content + '</span>';
         }).join('<br />') + '\n                                    </div>\n                                </div>\n                            </div>\n                        </span>\n                    </div>\n                </div>\n            </div>\n        ');
         return renderedPost;
     },
@@ -326,8 +326,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__js_user_adminFunctions__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__js_dom_objects__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__js_dom_functions__ = __webpack_require__(9);
+/*
+https://github.com/mysqljs/mysql
+https://www.getdonedone.com/building-the-optimal-user-database-model-for-your-application/
+https://medium.com/@kimtnguyen/relational-database-schema-design-overview-70e447ff66f9
+*/
 
-//
+
  // for broad variables
 
 

@@ -1,5 +1,11 @@
+/*
+https://github.com/mysqljs/mysql
+https://www.getdonedone.com/building-the-optimal-user-database-model-for-your-application/
+https://medium.com/@kimtnguyen/relational-database-schema-design-overview-70e447ff66f9
+*/
+
+
 import $ from './js/jquery';
-//
 import store from './js/store'; // for broad variables
 import Admin from './js/user_adminFunctions';
 import DOMponents from './js/dom_objects';

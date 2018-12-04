@@ -57,7 +57,7 @@ export default DOMponents = {
                                     <div class="post__comments">
                                         ${
                                             post.comments.map(comment => (
-                                                `<span>` + comment.content + `</span>`
+                                                `<span><strong>` + comment.user + `: </strong>` + comment.content + `</span>`
                                             )).join('<br />')
                                         }
                                     </div>
