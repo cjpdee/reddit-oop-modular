@@ -7,6 +7,7 @@ import DOMFuncs from './js/dom_functions';
 
 Admin.createUser("myUser","myPass");
 Admin.createUser("myG","myPass");
+store.setCurrentUser("myG");
 let currentUser = Admin.findUser("myG");
 currentUser.createPost('a-sub','My G\'s Post','What\'s up all the gs of the world');
 currentUser.createPost('b-sub','Gs','yes my g');
@@ -25,6 +26,10 @@ var init = function() {
 
     $("[hook-js=new-post]").on("click",function() {
         DOMponents.NewPostModal.draw();
+    })
+
+    $("[hook-js=new-user]").on("click",function() {
+        DOMponents.NewUserModal.draw();
     })
 
     $("[hook-js=display]").on("click","[post-js=create-comment]",function() {

@@ -16,6 +16,9 @@ var store = {
         currentUser = users[foundUserIndex];
         console.log("Current user set: ",currentUser);
     },
+    addUser : function(user) {
+        users.push(user);
+    },
     // POSTS
     getPostCount : ()=> post_count,
     incrementPostCount : ()=> post_count++,

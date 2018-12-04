@@ -91,6 +91,9 @@ var store = {
         currentUser = users[foundUserIndex];
         console.log("Current user set: ", currentUser);
     },
+    addUser: function addUser(user) {
+        users.push(user);
+    },
     // POSTS
     getPostCount: function getPostCount() {
         return post_count;
@@ -127,9 +130,6 @@ var store = {
         },
 
         findUser: function findUser(username) {
-            console.log("findUser()", __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getUsers().find(function (user) {
-                return user.username == username;
-            }));
             return __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getUsers().find(function (user) {
                 return user.username == username;
             });
@@ -160,10 +160,9 @@ var store = {
         },
 
         getUserFromPost: function getUserFromPost(post_id) {
-            var thisPost = getAllPosts().find(function (post) {
+            var thisPost = Admin.getAllPosts().find(function (post) {
                 return post.post_id == post_id;
             });
-            console.log('getUserFromPost()', thisPost.user);
             return thisPost.user;
         },
 
@@ -206,6 +205,10 @@ var store = {
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__user_adminFunctions__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__store__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__dom_functions__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__user_prototype__ = __webpack_require__(8);
+
+
 
 
 
@@ -220,18 +223,14 @@ var DOMponents;
     reinsert: function reinsert(element) {
         var prevElement = $(element).prev();
         var nextElement = $(element).next();
-        console.log(prevElement, nextElement);
         var thisPostId = $(element).data("postId");
         $(element).remove();
         if (prevElement.length) {
             prevElement.after(DOMponents.drawPost(thisPostId));
-            console.log('insert after');
         } else if (nextElement.length) {
             nextElement.before(DOMponents.drawPost(thisPostId));
-            console.log('insert before');
         } else {
             DOMponents.insertTop(DOMponents.drawPost(thisPostId));
-            console.log('insert top');
         }
     },
     drawPost: function drawPost(post_id) {
@@ -245,7 +244,6 @@ var DOMponents;
 
     NewPostModal: {
         draw: function draw() {
-            console.log('working?', __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser());
             $("body").append($('\n                <section class="modal__wrap" data-user="' + __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().username + '" modal-js="modal">\n                    <div class="modal">\n                        <h1>New Post</h1>\n                        <form onSubmit="e.preventDefault">\n                            <label for="title">Title</label>\n                            <input type="text" id="title">\n                            <label for="sub">Subreddit</label>\n                            <input type="text" id="sub">\n                            <label for="content">Content</label>\n                            <textarea name="" id="content" cols="30" rows="10"></textarea>\n                            <button modal-js="submit-post">Submit</button>\n                        </form>\n                    </div>\n                </section>\n            '));
             $('[modal-js=submit-post]').on('click', function (e) {
                 DOMponents.NewPostModal.submit(e);
@@ -254,7 +252,6 @@ var DOMponents;
 
         submit: function submit(e) {
             e.preventDefault();
-            console.log('aaaaa');
             var $form = $('[modal-js=modal]').children().children("form");
             var input = {
                 title: $form.children("#title").val(),
@@ -290,10 +287,22 @@ var DOMponents;
             $("body").append($('\n                <section class="modal__wrap" data-user="' + __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().username + '" modal-js="modal">\n                    <div class="modal">\n                        <h1>New User</h1>\n                        <form onSubmit="e.preventDefault">\n                            <label for="username">Username</label>\n                            <input type="text" id="username">\n                            <label for="password">Password</label>\n                            <input type="text" id="password">\n                            <button modal-js="submit-user">Submit</button>\n                        </form>\n                    </div>\n                </section>\n            '));
             $('[modal-js=submit-user]').on('click', function (e) {
                 e.preventDefault();
-                DOMponents.NewCommentModal.submit(post);
+                DOMponents.NewUserModal.submit();
             });
         },
-        submit: function submit() {}
+        submit: function submit() {
+            var $form = $('[modal-js=modal]').children().children("form");
+            var input = {
+                username: $form.children("#username").val(),
+                password: $form.children("#password").val()
+            };
+            $('[modal-js=modal]').remove();
+            var newUser = new __WEBPACK_IMPORTED_MODULE_3__user_prototype__["a" /* default */](input.username, input.password);
+            console.log(newUser);
+            __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].addUser(newUser);
+            console.log(__WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getUsers());
+            __WEBPACK_IMPORTED_MODULE_2__dom_functions__["a" /* default */].populateUsersDropdown();
+        }
     }
 });
 
@@ -326,6 +335,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 __WEBPACK_IMPORTED_MODULE_2__js_user_adminFunctions__["a" /* default */].createUser("myUser", "myPass");
 __WEBPACK_IMPORTED_MODULE_2__js_user_adminFunctions__["a" /* default */].createUser("myG", "myPass");
+__WEBPACK_IMPORTED_MODULE_1__js_store__["a" /* default */].setCurrentUser("myG");
 var currentUser = __WEBPACK_IMPORTED_MODULE_2__js_user_adminFunctions__["a" /* default */].findUser("myG");
 currentUser.createPost('a-sub', 'My G\'s Post', 'What\'s up all the gs of the world');
 currentUser.createPost('b-sub', 'Gs', 'yes my g');
@@ -343,6 +353,10 @@ var init = function init() {
 
     __WEBPACK_IMPORTED_MODULE_0__js_jquery___default()("[hook-js=new-post]").on("click", function () {
         __WEBPACK_IMPORTED_MODULE_3__js_dom_objects__["a" /* default */].NewPostModal.draw();
+    });
+
+    __WEBPACK_IMPORTED_MODULE_0__js_jquery___default()("[hook-js=new-user]").on("click", function () {
+        __WEBPACK_IMPORTED_MODULE_3__js_dom_objects__["a" /* default */].NewUserModal.draw();
     });
 
     __WEBPACK_IMPORTED_MODULE_0__js_jquery___default()("[hook-js=display]").on("click", "[post-js=create-comment]", function () {
@@ -2353,6 +2367,7 @@ User.prototype = {
     },
     createComment: function createComment(post_id, content) {
         var comment = {
+            user: this.username,
             comment_id: __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getCommentCount(),
             post_id: post_id,
             date_posted: new Date(),
@@ -2360,17 +2375,12 @@ User.prototype = {
             downvotes: 0,
             content: content,
             subreddit: __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPostSub(post_id)
-        };
-        this.comments.push(comment);
+            // commit comment to user
+        };this.comments.push(comment);
         __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].incrementCommentCount();
-        console.log('this post', __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(post_id));
 
         // pass this comment to the post it's linked to
-        //Admin.getThisPost(post_id).comments.push(comment);
-
-        __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(post_id).comments.push(this.comments.find(function (item) {
-            return item.comment_id == comment.comment_id;
-        }));
+        __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(post_id).comments.push(comment);
         return comment.comment_id;
     },
     downvotePost: function downvotePost(post_id) {
@@ -2466,6 +2476,7 @@ var DOMFuncs;
     },
 
     populateUsersDropdown: function populateUsersDropdown() {
+        $("[hook-js=select-user]").children().remove();
         __WEBPACK_IMPORTED_MODULE_2__store__["a" /* default */].getUsers().forEach(function (user) {
             $("[hook-js=select-user]").append($('\n                    <option value="' + user.username + '">\n                        ' + user.username + '\n                    </option>\n                '));
         });

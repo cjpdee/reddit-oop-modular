@@ -13,6 +13,7 @@ export default DOMFuncs = {
     },
 
     populateUsersDropdown : function () {
+        $("[hook-js=select-user]").children().remove();
         store.getUsers().forEach(function(user) {
             $("[hook-js=select-user]").append(
                 $(`

@@ -9,9 +9,6 @@ var Admin = {
     },
     
     findUser : function(username) {
-        console.log("findUser()",
-            store.getUsers().find(user => user.username == username)
-        );
         return store.getUsers().find(user => user.username == username);
     },
 
@@ -36,8 +33,7 @@ var Admin = {
     },
     
     getUserFromPost : function(post_id) {
-        var thisPost = getAllPosts().find(post => post.post_id == post_id);
-        console.log('getUserFromPost()',thisPost.user);
+        var thisPost = Admin.getAllPosts().find(post => post.post_id == post_id);
         return thisPost.user;
     },
     

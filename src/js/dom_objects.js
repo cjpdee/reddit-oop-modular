@@ -1,5 +1,7 @@
 import Admin from './user_adminFunctions';
 import store from './store';
+import DOMFuncs from './dom_functions';
+import User from './user_prototype';
 
 var DOMponents;
 export default DOMponents = {
@@ -12,19 +14,14 @@ export default DOMponents = {
     reinsert : function(element) {
         let prevElement = $(element).prev();
         let nextElement = $(element).next();
-        console.log(prevElement,nextElement);
         let thisPostId =  $(element).data("postId");
         $(element).remove();
         if(prevElement.length) {
             prevElement.after(DOMponents.drawPost(thisPostId));
-            console.log('insert after');
-            
         } else if(nextElement.length) {
             nextElement.before(DOMponents.drawPost(thisPostId));
-            console.log('insert before');
         } else {
             DOMponents.insertTop(DOMponents.drawPost(thisPostId));
-            console.log('insert top');
         }
     },
     drawPost : function(post_id) {
@@ -77,7 +74,6 @@ export default DOMponents = {
 
     NewPostModal : {
         draw : function() {
-            console.log('working?',store.getCurrentUser());
             $("body").append($(`
                 <section class="modal__wrap" data-user="${store.getCurrentUser().username}" modal-js="modal">
                     <div class="modal">
@@ -101,7 +97,6 @@ export default DOMponents = {
 
         submit : function(e) {
             e.preventDefault();
-            console.log('aaaaa');
             let $form = $(`[modal-js=modal]`).children().children("form");
             let input = {
                 title : $form.children("#title").val(),
@@ -139,7 +134,7 @@ export default DOMponents = {
             store.getCurrentUser().createComment(
                 post.post_id,
                 $("#content").val()
-            )
+            );
 
             $(`[modal-js=modal]`).remove();
             DOMponents.reinsert(`[data-post-id=${post.post_id}]`);
@@ -164,9 +159,21 @@ export default DOMponents = {
             `));
             $(`[modal-js=submit-user]`).on('click',function(e) {
                 e.preventDefault();
-                DOMponents.NewCommentModal.submit(post);
+                DOMponents.NewUserModal.submit();
             });
         },
-        submit: function() {}
+        submit: function() {
+            let $form = $(`[modal-js=modal]`).children().children("form");
+            let input = {
+                username : $form.children("#username").val(),
+                password : $form.children("#password").val()
+            }
+            $(`[modal-js=modal]`).remove();
+            let newUser = new User(input.username,input.password);
+            console.log(newUser);
+            store.addUser(newUser);
+            console.log(store.getUsers());
+            DOMFuncs.populateUsersDropdown();
+        }
     }
 }

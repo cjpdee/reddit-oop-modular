@@ -36,6 +36,7 @@ User.prototype = {
     },
     createComment : function(post_id,content) {
         let comment = {
+            user: this.username,
             comment_id: store.getCommentCount(),
             post_id: post_id,
             date_posted: new Date(),
@@ -44,16 +45,12 @@ User.prototype = {
             content: content,
             subreddit: Admin.getThisPostSub(post_id)
         }
+        // commit comment to user
         this.comments.push(comment);
         store.incrementCommentCount();
-        console.log('this post',Admin.getThisPost(post_id));
 
         // pass this comment to the post it's linked to
-        //Admin.getThisPost(post_id).comments.push(comment);
-        
-        Admin.getThisPost(post_id).comments.push(
-            this.comments.find(item => item.comment_id == comment.comment_id)
-        );
+        Admin.getThisPost(post_id).comments.push(comment);
         return comment.comment_id
     },
     downvotePost : function(post_id) {
