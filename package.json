@@ -1,14 +1,19 @@
 {
   "devDependencies": {
     "browser-sync": "^2.26.3",
-    "browser-sync-webpack-plugin": "2.0.1",
-    "laravel-mix": "^2.1.14"
+    "browser-sync-webpack-plugin": "^2.0.1",
+    "laravel-mix": "^2.1.14",
+    "webpack": "^4.27.1",
+    "webpack-cli": "^3.1.2"
   },
   "scripts": {
     "dev": "NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
     "watch": "NODE_ENV=development node_modules/webpack/bin/webpack.js --watch --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
     "hot": "NODE_ENV=development webpack-dev-server --inline --hot --config=node_modules/laravel-mix/setup/webpack.config.js",
-    "production": "NODE_ENV=production node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config,.js",
+    "production": "NODE_ENV=production node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
     "start-dev-api": "forever -w --watchDirectory server server/index.js 4000"
+  },
+  "dependencies": {
+    "@rails/webpacker": "^3.5.5"
   }
 }

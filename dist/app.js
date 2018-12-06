@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
+/******/ 	return __webpack_require__(__webpack_require__.s = 5);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -118,7 +118,7 @@ var store = {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__store__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_prototype__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_prototype__ = __webpack_require__(2);
 
 
 
@@ -203,10 +203,142 @@ var store = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = User;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__store__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__ = __webpack_require__(1);
+
+
+
+// User Constructor
+function User(username, password) {
+    this.username = username;
+    this.password = password;
+    this.date_created = new Date();
+    this.comments = [];
+    this.posts = [];
+    this.votes = {
+        up: [],
+        down: []
+    };
+}
+
+User.prototype = {
+    createPost: function createPost(subreddit, title, content) {
+        var post = {
+            post_id: __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getPostCount(),
+            date_posted: new Date(),
+            upvotes: 0,
+            downvotes: 0,
+            title: title,
+            user: this.username,
+            content: content,
+            subreddit: subreddit,
+            comments: []
+        };
+        this.posts.push(post);
+        __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].incrementPostCount();
+        return post;
+    },
+    deletePost: function deletePost(post_id) {
+        this.posts.pop(post_id);
+    },
+    createComment: function createComment(post_id, content) {
+        var comment = {
+            user: this.username,
+            comment_id: __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getCommentCount(),
+            post_id: post_id,
+            date_posted: new Date(),
+            upvotes: 0,
+            downvotes: 0,
+            content: content,
+            subreddit: __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPostSub(post_id)
+            // commit comment to user
+        };this.comments.push(comment);
+        __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].incrementCommentCount();
+
+        // pass this comment to the post it's linked to
+        __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(post_id).comments.push(comment);
+        return comment.comment_id;
+    },
+    downvotePost: function downvotePost(post_id) {
+        if (this.votes.down.find(function (downvotedPost) {
+            return downvotedPost == post_id;
+        })) {
+            console.log("this user has already voted on this post");
+            return;
+        } else {
+            var allPosts = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getAllPosts();
+            var thisPost = allPosts.find(function (post) {
+                return post.post_id == post_id;
+            });
+
+            thisPost.downvotes++;
+            this.votes.down.push(post_id);
+            console.log('this post was downvoted', thisPost);
+        }
+    },
+    // User.upvote('post',1)
+    upvote: function upvote(type, thing_id) {
+        if (this.votes.up.find(function (upvoted) {
+            return upvoted == thing_id;
+        })) {
+            console.log("this user has already voted on this " + type);
+            return;
+        } else {
+            var thisThing = void 0;
+            switch (type) {
+                case 'post':
+                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(thing_id);break;
+                case 'comment':
+                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisComment(thing_id);break;
+            }
+            if (!thisThing) {
+                console.log('That ' + type + ' doesn\'t exist!');
+                return;
+            }
+            console.log(type);
+            console.log("upvote()", thisThing);
+            thisThing.upvotes++;
+            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getCurrentUser().votes.up.push(thing_id);
+            console.log('this post was upvoted', thisThing);
+        }
+    },
+
+    downvote: function downvote(type, thing_id) {
+        if (this.votes.down.find(function (downvoted) {
+            return downvoted == thing_id;
+        })) {
+            console.log("this user has already voted on this " + type);
+            return;
+        } else {
+            var thisThing = void 0;
+            switch (type) {
+                case 'post':
+                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(thing_id);break;
+                case 'comment':
+                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisComment(thing_id);break;
+            }
+            if (!thisThing) {
+                console.log('That ' + type + ' doesn\'t exist!');
+                return;
+            }
+            console.log("downvote()", thisThing);
+            thisThing.downvotes++;
+            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getCurrentUser().votes.down.push(thing_id);
+            console.log('this post was downvoted', thisThing);
+        }
+    }
+};
+
+/***/ }),
+/* 3 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__user_adminFunctions__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__store__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__dom_functions__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__user_prototype__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__dom_functions__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__user_prototype__ = __webpack_require__(2);
 
 
 
@@ -307,25 +439,55 @@ var DOMponents;
 });
 
 /***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(4);
-module.exports = __webpack_require__(10);
-
-
-/***/ }),
 /* 4 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__dom_objects__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__store__ = __webpack_require__(0);
+// COMPONENT MACROS
+
+
+
+
+// function sortPosts(sortType) {}
+var DOMFuncs;
+/* harmony default export */ __webpack_exports__["a"] = (DOMFuncs = {
+    drawAllPosts: function drawAllPosts(sortedPosts) {
+        __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getAllPosts().forEach(function (post) {
+            __WEBPACK_IMPORTED_MODULE_0__dom_objects__["a" /* default */].insertTop(__WEBPACK_IMPORTED_MODULE_0__dom_objects__["a" /* default */].drawPost(post.post_id));
+        });
+    },
+
+    populateUsersDropdown: function populateUsersDropdown() {
+        $("[hook-js=select-user]").children().remove();
+        __WEBPACK_IMPORTED_MODULE_2__store__["a" /* default */].getUsers().forEach(function (user) {
+            $("[hook-js=select-user]").append($('\n                    <option value="' + user.username + '">\n                        ' + user.username + '\n                    </option>\n                '));
+        });
+    }
+});
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(6);
+module.exports = __webpack_require__(10);
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__js_jquery__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__js_jquery__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__js_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__js_jquery__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__js_store__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__js_user_adminFunctions__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__js_dom_objects__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__js_dom_functions__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__js_dom_objects__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__js_dom_functions__ = __webpack_require__(4);
 /*
 https://github.com/mysqljs/mysql
 https://www.getdonedone.com/building-the-optimal-user-database-model-for-your-application/
@@ -403,7 +565,7 @@ var init = function init() {
 init();
 
 /***/ }),
-/* 5 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -2279,7 +2441,7 @@ init();
     e ? w.readyWait++ : w.ready(!0);
   }, w.isArray = Array.isArray, w.parseJSON = JSON.parse, w.nodeName = D, w.isFunction = g, w.isWindow = v, w.camelCase = Q, w.type = b, w.now = Date.now, w.isNumeric = function (e) {
     var t = w.type(e);return ("number" === t || "string" === t) && !isNaN(e - parseFloat(e));
-  }, "function" == "function" && __webpack_require__(7) && !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = (function () {
+  }, "function" == "function" && __webpack_require__(9) && !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = (function () {
     return w;
   }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));var vt = e.jQuery,
@@ -2287,10 +2449,10 @@ init();
     return e.$ === w && (e.$ = yt), t && e.jQuery === w && (e.jQuery = vt), w;
   }, t || (e.jQuery = e.$ = w), w;
 });
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(6)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8)(module)))
 
 /***/ }),
-/* 6 */
+/* 8 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -2318,175 +2480,13 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, exports) {
 
 /* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
 module.exports = __webpack_amd_options__;
 
 /* WEBPACK VAR INJECTION */}.call(exports, {}))
-
-/***/ }),
-/* 8 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = User;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__store__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__ = __webpack_require__(1);
-
-
-
-// User Constructor
-function User(username, password) {
-    this.username = username;
-    this.password = password;
-    this.date_created = new Date();
-    this.comments = [];
-    this.posts = [];
-    this.votes = {
-        up: [],
-        down: []
-    };
-}
-
-User.prototype = {
-    createPost: function createPost(subreddit, title, content) {
-        var post = {
-            post_id: __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getPostCount(),
-            date_posted: new Date(),
-            upvotes: 0,
-            downvotes: 0,
-            title: title,
-            user: this.username,
-            content: content,
-            subreddit: subreddit,
-            comments: []
-        };
-        this.posts.push(post);
-        __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].incrementPostCount();
-        return post;
-    },
-    deletePost: function deletePost(post_id) {
-        this.posts.pop(post_id);
-    },
-    createComment: function createComment(post_id, content) {
-        var comment = {
-            user: this.username,
-            comment_id: __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getCommentCount(),
-            post_id: post_id,
-            date_posted: new Date(),
-            upvotes: 0,
-            downvotes: 0,
-            content: content,
-            subreddit: __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPostSub(post_id)
-            // commit comment to user
-        };this.comments.push(comment);
-        __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].incrementCommentCount();
-
-        // pass this comment to the post it's linked to
-        __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(post_id).comments.push(comment);
-        return comment.comment_id;
-    },
-    downvotePost: function downvotePost(post_id) {
-        if (this.votes.down.find(function (downvotedPost) {
-            return downvotedPost == post_id;
-        })) {
-            console.log("this user has already voted on this post");
-            return;
-        } else {
-            var allPosts = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getAllPosts();
-            var thisPost = allPosts.find(function (post) {
-                return post.post_id == post_id;
-            });
-
-            thisPost.downvotes++;
-            this.votes.down.push(post_id);
-            console.log('this post was downvoted', thisPost);
-        }
-    },
-    // User.upvote('post',1)
-    upvote: function upvote(type, thing_id) {
-        if (this.votes.up.find(function (upvoted) {
-            return upvoted == thing_id;
-        })) {
-            console.log("this user has already voted on this " + type);
-            return;
-        } else {
-            var thisThing = void 0;
-            switch (type) {
-                case 'post':
-                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(thing_id);break;
-                case 'comment':
-                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisComment(thing_id);break;
-            }
-            if (!thisThing) {
-                console.log('That ' + type + ' doesn\'t exist!');
-                return;
-            }
-            console.log(type);
-            console.log("upvote()", thisThing);
-            thisThing.upvotes++;
-            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getCurrentUser().votes.up.push(thing_id);
-            console.log('this post was upvoted', thisThing);
-        }
-    },
-
-    downvote: function downvote(type, thing_id) {
-        if (this.votes.down.find(function (downvoted) {
-            return downvoted == thing_id;
-        })) {
-            console.log("this user has already voted on this " + type);
-            return;
-        } else {
-            var thisThing = void 0;
-            switch (type) {
-                case 'post':
-                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(thing_id);break;
-                case 'comment':
-                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisComment(thing_id);break;
-            }
-            if (!thisThing) {
-                console.log('That ' + type + ' doesn\'t exist!');
-                return;
-            }
-            console.log("downvote()", thisThing);
-            thisThing.downvotes++;
-            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getCurrentUser().votes.down.push(thing_id);
-            console.log('this post was downvoted', thisThing);
-        }
-    }
-};
-
-/***/ }),
-/* 9 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__dom_objects__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__store__ = __webpack_require__(0);
-// COMPONENT MACROS
-
-
-
-
-// function sortPosts(sortType) {}
-var DOMFuncs;
-/* harmony default export */ __webpack_exports__["a"] = (DOMFuncs = {
-    drawAllPosts: function drawAllPosts(sortedPosts) {
-        __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getAllPosts().forEach(function (post) {
-            __WEBPACK_IMPORTED_MODULE_0__dom_objects__["a" /* default */].insertTop(__WEBPACK_IMPORTED_MODULE_0__dom_objects__["a" /* default */].drawPost(post.post_id));
-        });
-    },
-
-    populateUsersDropdown: function populateUsersDropdown() {
-        $("[hook-js=select-user]").children().remove();
-        __WEBPACK_IMPORTED_MODULE_2__store__["a" /* default */].getUsers().forEach(function (user) {
-            $("[hook-js=select-user]").append($('\n                    <option value="' + user.username + '">\n                        ' + user.username + '\n                    </option>\n                '));
-        });
-    }
-});
 
 /***/ }),
 /* 10 */
