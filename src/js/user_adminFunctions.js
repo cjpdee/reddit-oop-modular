@@ -1,6 +1,9 @@
 import store from './store';
 import User from './user_prototype';
 
+var io = require('socket.io-client');
+var socket = io.connect("http://127.0.0.1:8081");
+
 // admin functions
 export default (function() {
 var Admin = {
@@ -15,17 +18,40 @@ var Admin = {
     // Post functions
     
     getAllPosts : function() {
-        let allPosts = [];
-        store.getUsers().forEach(function (user) {
-            user.posts.forEach(function(post) {
-                allPosts.push(post);
+        return new Promise(function(resolve) {
+            // example at store.js
+
+            socket.emit('getAllPosts');
+            socket.on('getAllPosts',function(data) {
+                console.log(data);
+                // data.forEach(function(item){
+                //     let newUser = new User(item.username,item.password,item.date_created,item.comments,item.comment_upvotes,item.comment_downvotes,item.posts,item.post_upvotes,item.post_downvotes);
+                //     users.push(newUser)
+                // })
+                // console.log('-- getUsers');
+                // console.log(users);
+                resolve(data);
+            });
+
+            // let allPosts = [];
+            // store.getUsers().forEach(function (user) {
+            //     user.posts.forEach(function(post) {
+            //         allPosts.push(post);
+            //     });
+            // });
+            // return allPosts;
+        })
+        
+    },
+    // currently working on
+    getThisPost : function(post_id) {
+        return new Promise(function(resolve) {
+            socket.emit('getThisPost',post_id);
+            socket.on('getThisPost',function(data) {
+                console.log(data);
+                resolve(data);
             });
         });
-        return allPosts;
-    },
-    
-    getThisPost : function(post_id) {
-        return Admin.getAllPosts().find(post => post.post_id == post_id);
     },
 
     getThisPostSub : function(post_id) {

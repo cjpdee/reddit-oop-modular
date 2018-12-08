@@ -13,88 +13,92 @@ var currentUser;
 
 var store = {
     // USER
-    getUsers : new Promise(function(resolve,reject) {
-        console.log('getting users');
-        var x;
-        socket.emit('getUsers');
-        socket.on('getUsers',function(data) {
-            console.log('gotUsers',data);
-            users = [];
-            data.forEach(function(item){
-                let newUser = new User(item.username,item.password,item.date_created,item.comments,{up: item.comment_upvotes, down: item.comment_downvotes},item.posts,{up:item.post_upvotes,down:item.post_downvotes});
-                users.push(newUser)
-            })
-            console.log(users);
-            resolve(data);
-        });
-        // response.then(function(data){
-        //     console.log('it worked',data);
-        //     users = data;
-        // },function(){
-        //     console.log('it didnt worked');
-        // });
-        // return
-
-        // response.then(function(){
-        //     console.log('x',x)
-        //     return users;
-        // })
-        
-    }),
+    getUsers : function() {
+        return new Promise(function(resolve,reject) {
+            socket.emit('getUsers');
+            socket.on('getUsers',function(data) {
+                users = [];
+                data.forEach(function(item){
+                    let newUser = new User(item.username,item.password,item.date_created,item.comments,item.comment_upvotes,item.comment_downvotes,item.posts,item.post_upvotes,item.post_downvotes);
+                    users.push(newUser)
+                })
+                console.log('-- getUsers');
+                console.log(users);
+                resolve(users);
+            });
+        })
+    },
     getCurrentUser : ()=> currentUser,
     setCurrentUser : function(username) { // complete
-        store.getUsers.then(function(users) {
-            let foundUserIndex = users.map(function(e) {
-                if(e.username == username) {
-                    return e.username
-                }
-            }).indexOf(username);
-            currentUser = users[foundUserIndex];
-            console.log("Current user set: ",currentUser);
-        })
+        return new Promise(function(resolve) {
+            store.getUsers().then(function(users) {
+                let foundUserIndex = users.map(function(e) {
+                    if(e.username == username) {
+                        return e.username
+                    }
+                }).indexOf(username);
+                currentUser = users[foundUserIndex];
+                console.log("Current user set: ",currentUser);
+                // console.log(store.getCurrentUser());
+                resolve(currentUser);
+            });
+        }) 
     },
-    addUser : function(user) { // complete-ish
-        socket.emit('newUser',user);
-        window.location.reload(); // temp maybe
+    addUser : function() {
+        new Promise(function(user) { // complete-ish
+            socket.emit('newUser',user);
+
+            socket.on('newUser',function(data) {
+                console.log(data);
+                return data
+            })
+
+
+            // window.location.reload(); // temp maybe
+        })
     },
     // POSTS
-    getPostCount : new Promise(function() { // complete
-        socket.emit('getPostCount');
-        var postCount;
-        socket.on('getPostCount', function(data) {
-            console.log("-- first getPostCount --");
-            console.log(data);
-            postCount = data;
+    getPostCount : function() {
+        return new Promise(function(resolve) { // complete
+            socket.emit('getPostCount');
+            var postCount;
+            socket.on('getPostCount', function(data) {
+                console.log("-- getPostCount --");
+                console.log(data);
+                postCount = data;
+                resolve(data);
+            })
         })
-        return postCount;
-    }),
-    incrementPostCount : new Promise(function() { // complete
-        socket.emit('incrementPostCount', function(data) {
-            console.log("incremented post count: " + data);
-        });
-        socket.on('incrementedPostCount',function(data) {
-            console.log('server returned post count: ' + data);
+    },
+    incrementPostCount : function() {
+        return new Promise(function(resolve) { // complete
+            socket.emit('incrementPostCount');
+            socket.on('incrementedPostCount',function(data) {
+                console.log('-- incrementPostCount : ', data);
+                resolve(data);
+            });
         })
-    }),
+    },
     
-    getCommentCount : new Promise(function() {
-        console.log("-- getCommentCount --");
-        socket.emit('getCommentCount');
-        var commentCount;
-        socket.on('getCommentCount', function(data) {
-            console.log(data);
-            commentCount = data;
+    getCommentCount : function() {
+        new Promise(function() { // complete
+            socket.emit('getCommentCount');
+            var commentCount;
+            socket.on('getCommentCount', function(data) {
+                console.log("-- getCommentCount : ", data);
+                commentCount = data;
+            })
+            return commentCount;
         })
-        return commentCount;
-    }),
-    incrementCommentCount : new Promise(function() { // complete
-        socket.emit('incrementCommentCount', function(data) {
-            console.log("incremented Comment count: " + data);
-        });
-        socket.on('incrementedCommentCount',function(data) {
-            console.log('server returned Comment count: ' + data);
+    },
+    incrementCommentCount : function() {
+        new Promise(function() { // complete
+            socket.emit('incrementCommentCount');
+            socket.on('incrementCommentCount',function(data) {
+                console.log("-- incrementCommentCount : ", data);
+            })
         })
-    }),
+    },
 }
 
 export default store;

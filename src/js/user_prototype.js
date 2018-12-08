@@ -5,20 +5,20 @@ var io = require('socket.io-client');
 var socket = io.connect("http://127.0.0.1:8081");
 
 // User Constructor
-export default function User(username,password,date_created,comments,comment_votes,posts,post_votes) {
+export default function User(username,password,date_created,comments,comment_upvotes,comment_downvotes,posts,post_upvotes,post_downvotes) {
     this.username = username;
     this.password = password;
     if(date_created) {
         this.date_created = date_created;
         this.comments = comments;
         this.comment_votes = {
-            up   : comment_votes.up,
-            down : comment_votes.down
+            up   : comment_upvotes,
+            down : comment_downvotes
         }
         this.posts = posts;
         this.post_votes = {
-            up   : post_votes.up,
-            down : post_votes.down
+            up   : post_upvotes,
+            down : post_downvotes
         }
     } else {
         this.date_created = new Date();
@@ -33,26 +33,35 @@ export default function User(username,password,date_created,comments,comment_vot
             down : []
         }
     }
-    console.log(this);
 }
 
 User.prototype = {
     createPost : function(subreddit,title,content) {
-        store.getPostCount.then(function(data) {
+        store.getPostCount().then(function(data) {
+            console.log('get',data);
             let post = {
-                post_id: data++,
+                post_id: data,
                 date_posted: new Date(),
                 upvotes: 0,
                 downvotes: 0,
                 title: title,
-                user: this.username,
+                user: store.getCurrentUser().username,
                 content: content,
                 subreddit: subreddit,
                 comments: []
             }
             // this.posts.push(post);
-            socket.emit('UserCreateNewPost',post);
-            store.incrementPostCount;
+            console.log('the post',post);
+            socket.emit('userCreateNewPost',post);
+
+
+            socket.on('userCreateNewPost',function() {
+                console.log()
+                store.incrementPostCount();
+            })
+
+            
+            console.log('heres my post',post)
             return post
         });
     },

@@ -853,7 +853,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 
 
 
-var io = __webpack_require__(17);
+var io = __webpack_require__(10);
 var socket = io.connect("http://127.0.0.1:8081");
 
 var post_count = 1;
@@ -863,94 +863,99 @@ var currentUser;
 
 var store = {
     // USER
-    getUsers: new Promise(function (resolve, reject) {
-        console.log('getting users');
-        var x;
-        socket.emit('getUsers');
-        socket.on('getUsers', function (data) {
-            console.log('gotUsers', data);
-            users = [];
-            data.forEach(function (item) {
-                var newUser = new __WEBPACK_IMPORTED_MODULE_1__user_prototype__["a" /* default */](item.username, item.password, item.date_created, item.comments, { up: item.comment_upvotes, down: item.comment_downvotes }, item.posts, { up: item.post_upvotes, down: item.post_downvotes });
-                users.push(newUser);
+    getUsers: function getUsers() {
+        return new Promise(function (resolve, reject) {
+            socket.emit('getUsers');
+            socket.on('getUsers', function (data) {
+                users = [];
+                data.forEach(function (item) {
+                    var newUser = new __WEBPACK_IMPORTED_MODULE_1__user_prototype__["a" /* default */](item.username, item.password, item.date_created, item.comments, item.comment_upvotes, item.comment_downvotes, item.posts, item.post_upvotes, item.post_downvotes);
+                    users.push(newUser);
+                });
+                console.log('-- getUsers');
+                console.log(users);
+                resolve(users);
             });
-            console.log(users);
-            resolve(data);
         });
-        // response.then(function(data){
-        //     console.log('it worked',data);
-        //     users = data;
-        // },function(){
-        //     console.log('it didnt worked');
-        // });
-        // return
-
-        // response.then(function(){
-        //     console.log('x',x)
-        //     return users;
-        // })
-    }),
+    },
     getCurrentUser: function getCurrentUser() {
         return currentUser;
     },
     setCurrentUser: function setCurrentUser(username) {
         // complete
-        store.getUsers.then(function (users) {
-            var foundUserIndex = users.map(function (e) {
-                if (e.username == username) {
-                    return e.username;
-                }
-            }).indexOf(username);
-            currentUser = users[foundUserIndex];
-            console.log("Current user set: ", currentUser);
+        return new Promise(function (resolve) {
+            store.getUsers().then(function (users) {
+                var foundUserIndex = users.map(function (e) {
+                    if (e.username == username) {
+                        return e.username;
+                    }
+                }).indexOf(username);
+                currentUser = users[foundUserIndex];
+                console.log("Current user set: ", currentUser);
+                // console.log(store.getCurrentUser());
+                resolve(currentUser);
+            });
         });
     },
-    addUser: function addUser(user) {
-        // complete-ish
-        socket.emit('newUser', user);
-        window.location.reload(); // temp maybe
+    addUser: function addUser() {
+        new Promise(function (user) {
+            // complete-ish
+            socket.emit('newUser', user);
+
+            socket.on('newUser', function (data) {
+                console.log(data);
+                return data;
+            });
+
+            // window.location.reload(); // temp maybe
+        });
     },
     // POSTS
-    getPostCount: new Promise(function () {
-        // complete
-        socket.emit('getPostCount');
-        var postCount;
-        socket.on('getPostCount', function (data) {
-            console.log("-- first getPostCount --");
-            console.log(data);
-            postCount = data;
+    getPostCount: function getPostCount() {
+        return new Promise(function (resolve) {
+            // complete
+            socket.emit('getPostCount');
+            var postCount;
+            socket.on('getPostCount', function (data) {
+                console.log("-- getPostCount --");
+                console.log(data);
+                postCount = data;
+                resolve(data);
+            });
         });
-        return postCount;
-    }),
-    incrementPostCount: new Promise(function () {
-        // complete
-        socket.emit('incrementPostCount', function (data) {
-            console.log("incremented post count: " + data);
+    },
+    incrementPostCount: function incrementPostCount() {
+        return new Promise(function (resolve) {
+            // complete
+            socket.emit('incrementPostCount');
+            socket.on('incrementedPostCount', function (data) {
+                console.log('-- incrementPostCount : ', data);
+                resolve(data);
+            });
         });
-        socket.on('incrementedPostCount', function (data) {
-            console.log('server returned post count: ' + data);
-        });
-    }),
+    },
 
-    getCommentCount: new Promise(function () {
-        console.log("-- getCommentCount --");
-        socket.emit('getCommentCount');
-        var commentCount;
-        socket.on('getCommentCount', function (data) {
-            console.log(data);
-            commentCount = data;
+    getCommentCount: function getCommentCount() {
+        new Promise(function () {
+            // complete
+            socket.emit('getCommentCount');
+            var commentCount;
+            socket.on('getCommentCount', function (data) {
+                console.log("-- getCommentCount : ", data);
+                commentCount = data;
+            });
+            return commentCount;
         });
-        return commentCount;
-    }),
-    incrementCommentCount: new Promise(function () {
-        // complete
-        socket.emit('incrementCommentCount', function (data) {
-            console.log("incremented Comment count: " + data);
+    },
+    incrementCommentCount: function incrementCommentCount() {
+        new Promise(function () {
+            // complete
+            socket.emit('incrementCommentCount');
+            socket.on('incrementCommentCount', function (data) {
+                console.log("-- incrementCommentCount : ", data);
+            });
         });
-        socket.on('incrementedCommentCount', function (data) {
-            console.log('server returned Comment count: ' + data);
-        });
-    })
+    }
 };
 
 /* harmony default export */ __webpack_exports__["a"] = (store);
@@ -960,7 +965,7 @@ var store = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__dom_objects__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__dom_objects__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__store__ = __webpack_require__(2);
 // COMPONENT MACROS
@@ -972,17 +977,19 @@ var store = {
 var DOMFuncs;
 /* harmony default export */ __webpack_exports__["a"] = (DOMFuncs = {
     drawAllPosts: function drawAllPosts(sortedPosts) {
-        __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getAllPosts().forEach(function (post) {
+        sortedPosts.forEach(function (post) {
             __WEBPACK_IMPORTED_MODULE_0__dom_objects__["a" /* default */].insertTop(__WEBPACK_IMPORTED_MODULE_0__dom_objects__["a" /* default */].drawPost(post.post_id));
         });
     },
 
     populateUsersDropdown: function populateUsersDropdown() {
-        $("[hook-js=select-user]").children().remove();
-        __WEBPACK_IMPORTED_MODULE_2__store__["a" /* default */].getUsers.then(function (data) {
-            data.forEach(function (user) {
-                //console.log('user',user);
-                $("[hook-js=select-user]").append($('\n                        <option value="' + user.username + '">\n                            ' + user.username + '\n                        </option>\n                    '));
+        return new Promise(function (resolve) {
+            $("[hook-js=select-user]").children().remove();
+            __WEBPACK_IMPORTED_MODULE_2__store__["a" /* default */].getUsers().then(function (data) {
+                data.forEach(function (data) {
+                    $("[hook-js=select-user]").append($('\n                            <option value="' + data.username + '">\n                                ' + data.username + '\n                            </option>\n                        '));
+                });
+                resolve();
             });
         });
     }
@@ -997,6 +1004,9 @@ var DOMFuncs;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_prototype__ = __webpack_require__(9);
 
 
+
+var io = __webpack_require__(10);
+var socket = io.connect("http://127.0.0.1:8081");
 
 // admin functions
 /* harmony default export */ __webpack_exports__["a"] = ((function () {
@@ -1014,18 +1024,38 @@ var DOMFuncs;
         // Post functions
 
         getAllPosts: function getAllPosts() {
-            var allPosts = [];
-            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getUsers().forEach(function (user) {
-                user.posts.forEach(function (post) {
-                    allPosts.push(post);
-                });
-            });
-            return allPosts;
-        },
+            return new Promise(function (resolve) {
+                // example at store.js
 
+                socket.emit('getAllPosts');
+                socket.on('getAllPosts', function (data) {
+                    console.log(data);
+                    // data.forEach(function(item){
+                    //     let newUser = new User(item.username,item.password,item.date_created,item.comments,item.comment_upvotes,item.comment_downvotes,item.posts,item.post_upvotes,item.post_downvotes);
+                    //     users.push(newUser)
+                    // })
+                    // console.log('-- getUsers');
+                    // console.log(users);
+                    resolve(data);
+                });
+
+                // let allPosts = [];
+                // store.getUsers().forEach(function (user) {
+                //     user.posts.forEach(function(post) {
+                //         allPosts.push(post);
+                //     });
+                // });
+                // return allPosts;
+            });
+        },
+        // currently working on
         getThisPost: function getThisPost(post_id) {
-            return Admin.getAllPosts().find(function (post) {
-                return post.post_id == post_id;
+            return new Promise(function (resolve) {
+                socket.emit('getThisPost', post_id);
+                socket.on('getThisPost', function (data) {
+                    console.log(data);
+                    resolve(data);
+                });
             });
         },
 
@@ -1274,7 +1304,7 @@ function localstorage() {
   } catch (e) {}
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ }),
 /* 6 */
@@ -1531,7 +1561,7 @@ function localstorage() {
   } catch (e) {}
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ }),
 /* 9 */
@@ -1544,24 +1574,24 @@ function localstorage() {
 
 
 
-var io = __webpack_require__(17);
+var io = __webpack_require__(10);
 var socket = io.connect("http://127.0.0.1:8081");
 
 // User Constructor
-function User(username, password, date_created, comments, comment_votes, posts, post_votes) {
+function User(username, password, date_created, comments, comment_upvotes, comment_downvotes, posts, post_upvotes, post_downvotes) {
     this.username = username;
     this.password = password;
     if (date_created) {
         this.date_created = date_created;
         this.comments = comments;
         this.comment_votes = {
-            up: comment_votes.up,
-            down: comment_votes.down
+            up: comment_upvotes,
+            down: comment_downvotes
         };
         this.posts = posts;
         this.post_votes = {
-            up: post_votes.up,
-            down: post_votes.down
+            up: post_upvotes,
+            down: post_downvotes
         };
     } else {
         this.date_created = new Date();
@@ -1576,25 +1606,32 @@ function User(username, password, date_created, comments, comment_votes, posts, 
             down: []
         };
     }
-    console.log(this);
 }
 
 User.prototype = {
     createPost: function createPost(subreddit, title, content) {
-        __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getPostCount.then(function (data) {
+        __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getPostCount().then(function (data) {
+            console.log('get', data);
             var post = {
-                post_id: data++,
+                post_id: data,
                 date_posted: new Date(),
                 upvotes: 0,
                 downvotes: 0,
                 title: title,
-                user: this.username,
+                user: __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getCurrentUser().username,
                 content: content,
                 subreddit: subreddit,
                 comments: []
                 // this.posts.push(post);
-            };socket.emit('UserCreateNewPost', post);
-            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].incrementPostCount;
+            };console.log('the post', post);
+            socket.emit('userCreateNewPost', post);
+
+            socket.on('userCreateNewPost', function () {
+                console.log();
+                __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].incrementPostCount();
+            });
+
+            console.log('heres my post', post);
             return post;
         });
     },
@@ -1691,6 +1728,106 @@ User.prototype = {
 
 /***/ }),
 /* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+/**
+ * Module dependencies.
+ */
+
+var url = __webpack_require__(36);
+var parser = __webpack_require__(13);
+var Manager = __webpack_require__(22);
+var debug = __webpack_require__(5)('socket.io-client');
+
+/**
+ * Module exports.
+ */
+
+module.exports = exports = lookup;
+
+/**
+ * Managers cache.
+ */
+
+var cache = exports.managers = {};
+
+/**
+ * Looks up an existing `Manager` for multiplexing.
+ * If the user summons:
+ *
+ *   `io('http://localhost/a');`
+ *   `io('http://localhost/b');`
+ *
+ * We reuse the existing instance based on same scheme/port/host,
+ * and we initialize sockets for each namespace.
+ *
+ * @api public
+ */
+
+function lookup (uri, opts) {
+  if (typeof uri === 'object') {
+    opts = uri;
+    uri = undefined;
+  }
+
+  opts = opts || {};
+
+  var parsed = url(uri);
+  var source = parsed.source;
+  var id = parsed.id;
+  var path = parsed.path;
+  var sameNamespace = cache[id] && path in cache[id].nsps;
+  var newConnection = opts.forceNew || opts['force new connection'] ||
+                      false === opts.multiplex || sameNamespace;
+
+  var io;
+
+  if (newConnection) {
+    debug('ignoring socket cache for %s', source);
+    io = Manager(source, opts);
+  } else {
+    if (!cache[id]) {
+      debug('new io instance for %s', source);
+      cache[id] = Manager(source, opts);
+    }
+    io = cache[id];
+  }
+  if (parsed.query && !opts.query) {
+    opts.query = parsed.query;
+  }
+  return io.socket(parsed.path, opts);
+}
+
+/**
+ * Protocol version.
+ *
+ * @api public
+ */
+
+exports.protocol = parser.protocol;
+
+/**
+ * `connect`.
+ *
+ * @param {String} uri
+ * @api public
+ */
+
+exports.connect = lookup;
+
+/**
+ * Expose constructors for standalone build.
+ *
+ * @api public
+ */
+
+exports.Manager = __webpack_require__(22);
+exports.Socket = __webpack_require__(28);
+
+
+/***/ }),
+/* 11 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -1880,7 +2017,7 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports) {
 
 /**
@@ -2038,7 +2175,7 @@ function plural(ms, n, name) {
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -2459,7 +2596,7 @@ function error(msg) {
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4256,7 +4393,7 @@ function isnan (val) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(21)))
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // browser shim for xmlhttprequest module
@@ -4299,7 +4436,7 @@ module.exports = function (opts) {
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -4465,7 +4602,7 @@ Transport.prototype.onClose = function () {
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4526,7 +4663,7 @@ var DOMponents;
             };
             var newPost = __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().createPost(input.subreddit, input.title, input.content);
 
-            DOMponents.insertTop(DOMponents.drawPost(newPost.post_id));
+            // DOMponents.insertTop(DOMponents.drawPost(newPost.post_id));
             $('[modal-js=modal]').remove();
         }
     },
@@ -4571,106 +4708,6 @@ var DOMponents;
         }
     }
 });
-
-/***/ }),
-/* 17 */
-/***/ (function(module, exports, __webpack_require__) {
-
-
-/**
- * Module dependencies.
- */
-
-var url = __webpack_require__(36);
-var parser = __webpack_require__(12);
-var Manager = __webpack_require__(22);
-var debug = __webpack_require__(5)('socket.io-client');
-
-/**
- * Module exports.
- */
-
-module.exports = exports = lookup;
-
-/**
- * Managers cache.
- */
-
-var cache = exports.managers = {};
-
-/**
- * Looks up an existing `Manager` for multiplexing.
- * If the user summons:
- *
- *   `io('http://localhost/a');`
- *   `io('http://localhost/b');`
- *
- * We reuse the existing instance based on same scheme/port/host,
- * and we initialize sockets for each namespace.
- *
- * @api public
- */
-
-function lookup (uri, opts) {
-  if (typeof uri === 'object') {
-    opts = uri;
-    uri = undefined;
-  }
-
-  opts = opts || {};
-
-  var parsed = url(uri);
-  var source = parsed.source;
-  var id = parsed.id;
-  var path = parsed.path;
-  var sameNamespace = cache[id] && path in cache[id].nsps;
-  var newConnection = opts.forceNew || opts['force new connection'] ||
-                      false === opts.multiplex || sameNamespace;
-
-  var io;
-
-  if (newConnection) {
-    debug('ignoring socket cache for %s', source);
-    io = Manager(source, opts);
-  } else {
-    if (!cache[id]) {
-      debug('new io instance for %s', source);
-      cache[id] = Manager(source, opts);
-    }
-    io = cache[id];
-  }
-  if (parsed.query && !opts.query) {
-    opts.query = parsed.query;
-  }
-  return io.socket(parsed.path, opts);
-}
-
-/**
- * Protocol version.
- *
- * @api public
- */
-
-exports.protocol = parser.protocol;
-
-/**
- * `connect`.
- *
- * @param {String} uri
- * @api public
- */
-
-exports.connect = lookup;
-
-/**
- * Expose constructors for standalone build.
- *
- * @api public
- */
-
-exports.Manager = __webpack_require__(22);
-exports.Socket = __webpack_require__(28);
-
 
 /***/ }),
 /* 18 */
@@ -4753,7 +4790,7 @@ function isBuf(obj) {
           (withNativeArrayBuffer && (obj instanceof ArrayBuffer || isView(obj)));
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13).Buffer))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14).Buffer))
 
 /***/ }),
 /* 21 */
@@ -4794,7 +4831,7 @@ module.exports = g;
 var eio = __webpack_require__(44);
 var Socket = __webpack_require__(28);
 var Emitter = __webpack_require__(0);
-var parser = __webpack_require__(12);
+var parser = __webpack_require__(13);
 var on = __webpack_require__(29);
 var bind = __webpack_require__(30);
 var debug = __webpack_require__(5)('socket.io-client:manager');
@@ -5369,7 +5406,7 @@ Manager.prototype.onreconnect = function () {
  * Module dependencies
  */
 
-var XMLHttpRequest = __webpack_require__(14);
+var XMLHttpRequest = __webpack_require__(15);
 var XHR = __webpack_require__(47);
 var JSONP = __webpack_require__(56);
 var websocket = __webpack_require__(57);
@@ -5428,7 +5465,7 @@ function polling (opts) {
  * Module dependencies.
  */
 
-var Transport = __webpack_require__(15);
+var Transport = __webpack_require__(16);
 var parseqs = __webpack_require__(6);
 var parser = __webpack_require__(1);
 var inherit = __webpack_require__(7);
@@ -5446,7 +5483,7 @@ module.exports = Polling;
  */
 
 var hasXHR2 = (function () {
-  var XMLHttpRequest = __webpack_require__(14);
+  var XMLHttpRequest = __webpack_require__(15);
   var xhr = new XMLHttpRequest({ xdomain: false });
   return null != xhr.responseType;
 })();
@@ -5740,7 +5777,7 @@ function hasBinary (obj) {
   return false;
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13).Buffer))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14).Buffer))
 
 /***/ }),
 /* 26 */
@@ -5841,7 +5878,7 @@ module.exports = function(arr, obj){
  * Module dependencies.
  */
 
-var parser = __webpack_require__(12);
+var parser = __webpack_require__(13);
 var Emitter = __webpack_require__(0);
 var toArray = __webpack_require__(59);
 var on = __webpack_require__(29);
@@ -6353,7 +6390,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__js_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__js_jquery__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__js_store__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__js_user_adminFunctions__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__js_dom_objects__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__js_dom_objects__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__js_dom_functions__ = __webpack_require__(3);
 /*
 https://github.com/mysqljs/mysql
@@ -6436,14 +6473,37 @@ var init = function init() {
     WEB SOCKETS
 */
 
-var io = __webpack_require__(17);
+var io = __webpack_require__(10);
 var socket = io.connect("http://127.0.0.1:8081");
 
 socket.on('connect', function () {
     socket.emit('connected', "A Client has Connected");
 
-    __WEBPACK_IMPORTED_MODULE_4__js_dom_functions__["a" /* default */].populateUsersDropdown();
-    __WEBPACK_IMPORTED_MODULE_1__js_store__["a" /* default */].setCurrentUser("charlie");
+    __WEBPACK_IMPORTED_MODULE_4__js_dom_functions__["a" /* default */].populateUsersDropdown().then(function (data) {
+        console.log(data);
+        __WEBPACK_IMPORTED_MODULE_1__js_store__["a" /* default */].setCurrentUser("charlie").then(function () {
+            // store.getCurrentUser().createPost('title','sub','content');
+        });
+    });
+    // store.getUsers();
+
+
+    // Admin.getAllPosts()
+    //     .then(function(data){
+    //         console.log(data);
+    //         Admin.getThisPost(53).then(function(bata) {
+    //             console.log(bata);
+    //         })
+    //         // DOMFuncs.drawAllPosts(data);
+    //     })
+    // // DOMFuncs.drawAllPosts();
+
+    // Admin.getThisPost(53).then(function(bata) {
+    //     console.log(bata);
+    // })
+
+    // store.getUsers();
+
     // .then(function(){
     //     console.log('hello!');
     // })
@@ -8891,7 +8951,7 @@ exports.coerce = coerce;
 exports.disable = disable;
 exports.enable = enable;
 exports.enabled = enabled;
-exports.humanize = __webpack_require__(11);
+exports.humanize = __webpack_require__(12);
 
 /**
  * Active `debug` instances.
@@ -9305,7 +9365,7 @@ function localstorage() {
   } catch (e) {}
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ }),
 /* 39 */
@@ -9324,7 +9384,7 @@ exports.coerce = coerce;
 exports.disable = disable;
 exports.enable = enable;
 exports.enabled = enabled;
-exports.humanize = __webpack_require__(11);
+exports.humanize = __webpack_require__(12);
 
 /**
  * Active `debug` instances.
@@ -10109,7 +10169,7 @@ Socket.protocol = parser.protocol; // this is an int
  */
 
 Socket.Socket = Socket;
-Socket.Transport = __webpack_require__(15);
+Socket.Transport = __webpack_require__(16);
 Socket.transports = __webpack_require__(23);
 Socket.parser = __webpack_require__(1);
 
@@ -10745,7 +10805,7 @@ try {
  * Module requirements.
  */
 
-var XMLHttpRequest = __webpack_require__(14);
+var XMLHttpRequest = __webpack_require__(15);
 var Polling = __webpack_require__(24);
 var Emitter = __webpack_require__(0);
 var inherit = __webpack_require__(7);
@@ -11673,7 +11733,7 @@ exports.coerce = coerce;
 exports.disable = disable;
 exports.enable = enable;
 exports.enabled = enabled;
-exports.humanize = __webpack_require__(11);
+exports.humanize = __webpack_require__(12);
 
 /**
  * Active `debug` instances.
@@ -12141,7 +12201,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
  * Module dependencies.
  */
 
-var Transport = __webpack_require__(15);
+var Transport = __webpack_require__(16);
 var parser = __webpack_require__(1);
 var parseqs = __webpack_require__(6);
 var inherit = __webpack_require__(7);
@@ -12422,7 +12482,7 @@ WS.prototype.check = function () {
   return !!WebSocket && !('__initialize' in WebSocket && this.name === WS.prototype.name);
 };
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13).Buffer))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14).Buffer))
 
 /***/ }),
 /* 58 */

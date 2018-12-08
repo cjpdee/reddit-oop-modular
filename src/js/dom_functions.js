@@ -7,24 +7,26 @@ import store from './store';
 var DOMFuncs;
 export default DOMFuncs = {
     drawAllPosts : function(sortedPosts) {
-        Admin.getAllPosts().forEach(function(post) {
+        sortedPosts.forEach(function(post) {
             DOMponents.insertTop(DOMponents.drawPost(post.post_id));
         });
     },
 
     populateUsersDropdown : function () {
-        $("[hook-js=select-user]").children().remove();
-        store.getUsers.then(function(data) {
-            data.forEach(function(user) {
-                //console.log('user',user);
-                $("[hook-js=select-user]").append(
-                    $(`
-                        <option value="${user.username}">
-                            ${user.username}
-                        </option>
-                    `)
-                );
-            });
+        return new Promise(function(resolve) {
+            $("[hook-js=select-user]").children().remove();
+            store.getUsers().then(function(data) {
+                data.forEach(function(data) {
+                    $("[hook-js=select-user]").append(
+                        $(`
+                            <option value="${data.username}">
+                                ${data.username}
+                            </option>
+                        `)
+                    );
+                });
+                resolve();
+            })
         })
     }
 }

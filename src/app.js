@@ -89,9 +89,36 @@ var socket = io.connect("http://127.0.0.1:8081");
 
 socket.on('connect', function() {
     socket.emit('connected', "A Client has Connected");
+
+    DOMFuncs.populateUsersDropdown().then(function(data){
+        console.log(data)
+        store.setCurrentUser("charlie")
+            .then( function() {
+                // store.getCurrentUser().createPost('title','sub','content');
+            } )
         
-    DOMFuncs.populateUsersDropdown();
-    store.setCurrentUser("charlie");
+    })
+    // store.getUsers();
+    
+
+    
+
+    // Admin.getAllPosts()
+    //     .then(function(data){
+    //         console.log(data);
+    //         Admin.getThisPost(53).then(function(bata) {
+    //             console.log(bata);
+    //         })
+    //         // DOMFuncs.drawAllPosts(data);
+    //     })
+    // // DOMFuncs.drawAllPosts();
+
+    // Admin.getThisPost(53).then(function(bata) {
+    //     console.log(bata);
+    // })
+    
+    // store.getUsers();
+
     // .then(function(){
     //     console.log('hello!');
     // })

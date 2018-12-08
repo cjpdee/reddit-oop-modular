@@ -105,7 +105,7 @@ export default DOMponents = {
             }
             let newPost = store.getCurrentUser().createPost(input.subreddit,input.title,input.content);
 
-            DOMponents.insertTop(DOMponents.drawPost(newPost.post_id));
+            // DOMponents.insertTop(DOMponents.drawPost(newPost.post_id));
             $(`[modal-js=modal]`).remove();
         },
     },

@@ -46,11 +46,6 @@ app.get('/app.js', function(req, res, next) {
 	console.log('routed client to js');
 });
 
-app.get("/request",function(req,res,next) {
-	res.send("hi from server");
-	console.log("sent back data to client");
-});
-
 /*
 ------------------------
 ------- sockets --------
@@ -78,17 +73,22 @@ io.on('connection', client => {
 		});
 	});
 
-	client.on('UserCreateNewPost', data => {
-
+	client.on('userCreateNewPost', data => {
+		if ( !data.user ) {
+			console.log("failed to enter post to database",data)
+			return
+		}
+		console.log("Creating new post: " + data.title);
 		con.query("INSERT INTO posts (post_id,date_posted,user,subreddit,title,content,comments,upvotes,downvotes) VALUE ('" +
 			data.post_id + "','" + data.date_posted + "','" +
 			data.user + "','" + data.subreddit + "','" +
 			data.title + "','" + data.content + "','" +
-			data.comments + "','" + date.upvotes + "','" +
+			data.comments + "','" + data.upvotes + "','" +
 			data.downvotes +
 		"')", function(err, result) {
 			if(err) throw err;
 			console.log(result);
+			client.emit('userCreateNewPost');
 		});
 	})
 
@@ -103,14 +103,14 @@ io.on('connection', client => {
 
 	client.on('getUsers',function() {
 		let data;
-		con.query("SELECT * from users", function(err, result, fields) {
+		return con.query("SELECT * from users", function(err, result, fields) {
 			if (err) throw err;
-			console.log(result);
+			// console.log(result);
 
 			client.emit('getUsers',result);
-			data = result;
+			return result;
 		})
-		return data;
+		// return data;
 	})
 
 	// ------------
@@ -119,8 +119,8 @@ io.on('connection', client => {
 	client.on('getPostCount', function() {
 		con.query("SELECT value FROM store WHERE name='post_count'", function (err, result, fields) {
 			if (err) throw err;
-			console.log(result[0].value);
-			client.emit('getPostCount',result[0].value)
+			console.log("client retrieved post_count from db");
+			client.emit('getPostCount',result[0].value);
 		});
 	});
 
@@ -128,56 +128,65 @@ io.on('connection', client => {
 	// incrementPostCount
 
 	client.on('incrementPostCount', function() {
-
 		con.query("SELECT value FROM store WHERE name='post_count'", function (err, result, fields) {
 			if (err) throw err;
-			let incrementedValue = result[0].value++;
-			client.emit('incrementPostCount',incrementedValue);
-			con.query("UPDATE store SET value = '" +  result[0].value + "' WHERE name = 'post_count'",function(err,result) {
+			let incrementedValue = parseInt(result[0].value) + 1;
+			
+			con.query("UPDATE store SET value = '" +  incrementedValue + "' WHERE name = 'post_count'",function(err,result) {
 				if(err) throw err;
-				console.log('did query: ',result); 
+				console.log("client incremented post_count"); 
+				client.emit('incrementPostCount',incrementedValue);
 			});
 		});
+	});
 
-		//con.query("UPDATE store SET value = '" + data + "' WHERE name = 'post_count'");
-
-		// UPDATE customers SET address = 'Canyon 123' WHERE address = 'Valley 345'
-	})
-
-
-	// ------------
-	// getPostCount
+	// ---------------
+	// getCommentCount
 
 	client.on('getCommentCount', function() {
 		con.query("SELECT value FROM store WHERE name='comment_count'", function (err, result, fields) {
 			if (err) throw err;
-			console.log(result[0].value);
+			console.log("client retrieved comment_count from db");
 			client.emit('getCommentCount',result[0].value)
 		});
 	});
 
-
+	// ---------------------
+	// incrementCommentCount
 
 	client.on('incrementCommentCount', function() {
-
 		con.query("SELECT value FROM store WHERE name='comment_count'", function (err, result, fields) {
 			if (err) throw err;
 			let incrementedValue = result[0].value++;
-			client.emit('incrementCommentCount',incrementedValue);
 			con.query("UPDATE store SET value = '" +  result[0].value + "' WHERE name = 'comment_count'",function(err,result) {
 				if(err) throw err;
-				console.log('did query: ',result);
+				console.log("client incremented comment_count to ", incrementedValue+1);
+				client.emit('incrementCommentCount',incrementedValue+1);
 			});
 		});
+	});
 
-		//con.query("UPDATE store SET value = '" + data + "' WHERE name = 'post_count'");
+	/*
+		USER ADMIN FUNCTIONS
+	*/
 
-		// UPDATE customers SET address = 'Canyon 123' WHERE address = 'Valley 345'
-	})
+	//------------
+	// getAllPosts
 
+	client.on('getAllPosts',function() {
+		con.query("SELECT * FROM posts", function(err,result) {
+			if (err) throw err;
+			console.log('retrieved all posts',result);
+			client.emit('getAllPosts',result);
+		});
+	});
 
-
-
+	client.on('getThisPost',function(data) {
+		con.query("SELECT * FROM posts WHERE 'post_id' = '" + data + "'",function(err,result) {
+			console.log(result);
+			client.emit('getThisPost',result);
+		});
+	});
 
 	client.on('connected', data => { console.log(data); });
 	client.on('disconnect', () => { console.log("User disconnected") });
