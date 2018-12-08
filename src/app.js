@@ -10,24 +10,27 @@ import store from './js/store'; // for broad variables
 import Admin from './js/user_adminFunctions';
 import DOMponents from './js/dom_objects';
 import DOMFuncs from './js/dom_functions';
+import dom_functions from './js/dom_functions';
 
-Admin.createUser("myUser","myPass");
-Admin.createUser("myG","myPass");
-store.setCurrentUser("myG");
-let currentUser = Admin.findUser("myG");
-currentUser.createPost('a-sub','My G\'s Post','What\'s up all the gs of the world');
-currentUser.createPost('b-sub','Gs','yes my g');
-currentUser.createComment(1,'comment data');
-currentUser.createComment(1,'my g this is sick');
-currentUser.createComment(2,'commf dfsds2');
+
+// Admin.createUser("myUser","myPass");
+//Admin.createUser("myG","myPass");
+// store.setCurrentUser("myG");
+// let currentUser = Admin.findUser("myG");
+//currentUser.createPost('a-sub','My G\'s Post','What\'s up all the gs of the world');
+// currentUser.createPost('b-sub','Gs','yes my g');
+// currentUser.createComment(1,'comment data');
+// currentUser.createComment(1,'my g this is sick');
+// currentUser.createComment(2,'commf dfsds2');
 
 
 var init = function() {
-    DOMFuncs.populateUsersDropdown();
-    DOMFuncs.drawAllPosts(store.getUsers());
+    //DOMFuncs.populateUsersDropdown();
+    // DOMFuncs.drawAllPosts(store.getUsers());
 
     $("[hook-js=select-user]").on("change",function() {
         store.setCurrentUser(this.value);
+        console.log('current user',store.getCurrentUser);
     })
 
     $("[hook-js=new-post]").on("click",function() {
@@ -72,7 +75,46 @@ var init = function() {
     $(document).on('click',"[modal-js=modal] > div",function(){
         return false;
     });
+
+    
 }
+
+/*
+    WEB SOCKETS
+*/
+
+var io = require('socket.io-client');
+var socket = io.connect("http://127.0.0.1:8081");
+
+
+socket.on('connect', function() {
+    socket.emit('connected', "A Client has Connected");
+        
+    DOMFuncs.populateUsersDropdown();
+    store.setCurrentUser("charlie");
+    // .then(function(){
+    //     console.log('hello!');
+    // })
+    // DOMFuncs.populateUsersDropdown();
+});
+
+
+
+$("[hook-js=test]").on("click",function() {
+    console.log("button pressed")
+    socket.emit('request', 'a request'); // emit an event to the socket
+    socket.on('reply', () => { console.log("got reply") }); // listen to the event
+})
+
+
+
+
+
+
+
+
+
+
 
 
 

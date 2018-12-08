@@ -172,7 +172,7 @@ export default DOMponents = {
             let newUser = new User(input.username,input.password);
             console.log(newUser);
             store.addUser(newUser);
-            console.log(store.getUsers());
+            console.log(store.getUsers);
             DOMFuncs.populateUsersDropdown();
         }
     }

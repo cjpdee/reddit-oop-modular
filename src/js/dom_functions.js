@@ -14,14 +14,17 @@ export default DOMFuncs = {
 
     populateUsersDropdown : function () {
         $("[hook-js=select-user]").children().remove();
-        store.getUsers().forEach(function(user) {
-            $("[hook-js=select-user]").append(
-                $(`
-                    <option value="${user.username}">
-                        ${user.username}
-                    </option>
-                `)
-            );
-        });
+        store.getUsers.then(function(data) {
+            data.forEach(function(user) {
+                //console.log('user',user);
+                $("[hook-js=select-user]").append(
+                    $(`
+                        <option value="${user.username}">
+                            ${user.username}
+                        </option>
+                    `)
+                );
+            });
+        })
     }
 }

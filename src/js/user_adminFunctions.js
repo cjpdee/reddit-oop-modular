@@ -19,7 +19,7 @@ var Admin = {
         store.getUsers().forEach(function (user) {
             user.posts.forEach(function(post) {
                 allPosts.push(post);
-            })
+            });
         });
         return allPosts;
     },

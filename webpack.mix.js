@@ -12,6 +12,7 @@ let mix = require('laravel-mix');
  */
 
 mix.js('src/app.js', 'dist/').sass('src/app.scss', 'dist/')
+    .js('server/server.js','dist/server.js')
 	.copyDirectory(`src/index.html`, `dist/`)
 	.browserSync({
         proxy: '',

@@ -2,16 +2,35 @@ import store from './store';
 import Admin from './user_adminFunctions';
 
 // User Constructor
-export default function User(username,password) {
+export default function User(username,password,date_created,comments,comment_votes,posts,post_votes) {
     this.username = username;
     this.password = password;
-    this.date_created = new Date();
-    this.comments = [];
-    this.posts = [];
-    this.votes = {
-        up   : [],
-        down : []
+    if(date_created) {
+        this.date_created = date_created;
+        this.comments = comments;
+        this.comment_votes = {
+            up   : comment_votes.up,
+            down : comment_votes.down
+        }
+        this.posts = posts;
+        this.post_votes = {
+            up   : post_votes.up,
+            down : post_votes.down
+        }
+    } else {
+        this.date_created = new Date();
+        this.comments = [];
+        this.comment_votes = {
+            up   : [],
+            down : []
+        }
+        this.posts = [];
+        this.post_votes = {
+            up   : [],
+            down : []
+        }
     }
+    console.log(this);
 }
 
 User.prototype = {

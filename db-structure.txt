@@ -1,0 +1,26 @@
+
+user {
+  username,
+  password,
+  date_created,
+  comments: [],
+  posts : [],
+  votes : {
+    up: [],
+    down: []
+  }
+}
+
+
+comments,posts,votes
+
+comments + posts: unique tables
+votes: relational, stored within posts/comments/users tables independently
+
+for users:
+	comments: [list-of-comment_ids]
+	comment_upvotes: ''
+	comment_downvotes: ''
+	posts: [list-of-post_ids]
+	post_upvotes ''
+	post_downvotes ''

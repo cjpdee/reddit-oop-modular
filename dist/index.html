@@ -1,19 +1,22 @@
-<head>
-    <link rel="stylesheet" href="app.css">
-</head>
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="/app.css">
+    </head>
 
-<body>
+    <body>
 
-    <div class="controls__wrap">
-        <select name="current-user" hook-js="select-user">
-            <option value="">No User</option>
-        </select>
-        <button class="controls__btn" hook-js="new-post">New Post</button>
-        <button class="controls__btn" hook-js="new-user">New User</button>
-    </div>
+        <div class="controls__wrap">
+            <select name="current-user" hook-js="select-user">
+                <option value="">No User</option>
+            </select>
+            <button class="controls__btn" hook-js="new-post">New Post</button>
+            <button class="controls__btn" hook-js="new-user">New User</button>
+            <button hook-js="test">test</button>
+        </div>
 
-    <div class="display__wrap" hook-js="display"></div>
+        <div class="display__wrap" hook-js="display"></div>
 
-</body>
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" type="module" integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E=" crossorigin="anonymous"></script>
-<script src="app.js" type="module"></script>
+    </body>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" type="module"></script>
+    <script src="/app.js" type="module"></script>
+</html>
