@@ -42,7 +42,7 @@ var store = {
         
     }),
     getCurrentUser : ()=> currentUser,
-    setCurrentUser : function(username) { // this thing isn't working
+    setCurrentUser : function(username) { // complete
         store.getUsers.then(function(users) {
             let foundUserIndex = users.map(function(e) {
                 if(e.username == username) {
@@ -53,12 +53,12 @@ var store = {
             console.log("Current user set: ",currentUser);
         })
     },
-    addUser : function(user) {
+    addUser : function(user) { // complete-ish
         socket.emit('newUser',user);
         window.location.reload(); // temp maybe
     },
     // POSTS
-    getPostCount : new Promise(function() {
+    getPostCount : new Promise(function() { // complete
         socket.emit('getPostCount');
         var postCount;
         socket.on('getPostCount', function(data) {
@@ -68,23 +68,33 @@ var store = {
         })
         return postCount;
     }),
-    incrementPostCount : new Promise(function() {
+    incrementPostCount : new Promise(function() { // complete
         socket.emit('incrementPostCount', function(data) {
             console.log("incremented post count: " + data);
         });
+        socket.on('incrementedPostCount',function(data) {
+            console.log('server returned post count: ' + data);
+        })
     }),
     
-    getCommentCount : function() {
+    getCommentCount : new Promise(function() {
+        console.log("-- getCommentCount --");
         socket.emit('getCommentCount');
         var commentCount;
         socket.on('getCommentCount', function(data) {
-            console.log("-- first getPostCount --");
             console.log(data);
             commentCount = data;
         })
         return commentCount;
-    },
-    incrementCommentCount : ()=> comment_count++
+    }),
+    incrementCommentCount : new Promise(function() { // complete
+        socket.emit('incrementCommentCount', function(data) {
+            console.log("incremented Comment count: " + data);
+        });
+        socket.on('incrementedCommentCount',function(data) {
+            console.log('server returned Comment count: ' + data);
+        })
+    }),
 }
 
 export default store;

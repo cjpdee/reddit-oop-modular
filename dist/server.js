@@ -64,19 +64,33 @@ io.on('connection', client => {
 	// NEW USER
 
 	client.on('newUser', data => {
-		console.log(data.username);
+		console.log("Creating new user: " + data.username);
 
 		con.query("INSERT INTO users (username, password, date_created, comments, comment_upvotes, comment_downvotes, posts, post_upvotes, post_downvotes) VALUES ('" +
-				data.username + "','" + data.password + "','" +
-				data.date_created + "','" + data.comments + "','" +
-				data.comment_votes.up + "','" + data.comment_votes.down + "','" +
-				data.posts + "','" + data.post_votes.up + "','" +
-				data.post_votes.down +
-			"')", function (err, result, fields) {
+			data.username + "','" + data.password + "','" +
+			data.date_created + "','" + data.comments + "','" +
+			data.comment_votes.up + "','" + data.comment_votes.down + "','" +
+			data.posts + "','" + data.post_votes.up + "','" +
+			data.post_votes.down +
+		"')", function (err, result, fields) {
 			if (err) throw err;
 			console.log(result);
 		});
 	});
+
+	client.on('UserCreateNewPost', data => {
+
+		con.query("INSERT INTO posts (post_id,date_posted,user,subreddit,title,content,comments,upvotes,downvotes) VALUE ('" +
+			data.post_id + "','" + data.date_posted + "','" +
+			data.user + "','" + data.subreddit + "','" +
+			data.title + "','" + data.content + "','" +
+			data.comments + "','" + date.upvotes + "','" +
+			data.downvotes +
+		"')", function(err, result) {
+			if(err) throw err;
+			console.log(result);
+		});
+	})
 
 	/*
 	-----------------------
@@ -117,8 +131,12 @@ io.on('connection', client => {
 
 		con.query("SELECT value FROM store WHERE name='post_count'", function (err, result, fields) {
 			if (err) throw err;
-			console.log(result[0].value);
-			// client.emit('incrementedPostCount',result[0].value++);
+			let incrementedValue = result[0].value++;
+			client.emit('incrementPostCount',incrementedValue);
+			con.query("UPDATE store SET value = '" +  result[0].value + "' WHERE name = 'post_count'",function(err,result) {
+				if(err) throw err;
+				console.log('did query: ',result); 
+			});
 		});
 
 		//con.query("UPDATE store SET value = '" + data + "' WHERE name = 'post_count'");
@@ -127,7 +145,35 @@ io.on('connection', client => {
 	})
 
 
+	// ------------
+	// getPostCount
 
+	client.on('getCommentCount', function() {
+		con.query("SELECT value FROM store WHERE name='comment_count'", function (err, result, fields) {
+			if (err) throw err;
+			console.log(result[0].value);
+			client.emit('getCommentCount',result[0].value)
+		});
+	});
+
+
+
+	client.on('incrementCommentCount', function() {
+
+		con.query("SELECT value FROM store WHERE name='comment_count'", function (err, result, fields) {
+			if (err) throw err;
+			let incrementedValue = result[0].value++;
+			client.emit('incrementCommentCount',incrementedValue);
+			con.query("UPDATE store SET value = '" +  result[0].value + "' WHERE name = 'comment_count'",function(err,result) {
+				if(err) throw err;
+				console.log('did query: ',result);
+			});
+		});
+
+		//con.query("UPDATE store SET value = '" + data + "' WHERE name = 'post_count'");
+
+		// UPDATE customers SET address = 'Canyon 123' WHERE address = 'Valley 345'
+	})
 
 
 

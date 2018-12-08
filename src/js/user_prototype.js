@@ -1,6 +1,9 @@
 import store from './store';
 import Admin from './user_adminFunctions';
 
+var io = require('socket.io-client');
+var socket = io.connect("http://127.0.0.1:8081");
+
 // User Constructor
 export default function User(username,password,date_created,comments,comment_votes,posts,post_votes) {
     this.username = username;
@@ -35,20 +38,23 @@ export default function User(username,password,date_created,comments,comment_vot
 
 User.prototype = {
     createPost : function(subreddit,title,content) {
-        let post = {
-            post_id: store.getPostCount(),
-            date_posted: new Date(),
-            upvotes: 0,
-            downvotes: 0,
-            title: title,
-            user: this.username,
-            content: content,
-            subreddit: subreddit,
-            comments: []
-        }
-        this.posts.push(post);
-        store.incrementPostCount();
-        return post
+        store.getPostCount.then(function(data) {
+            let post = {
+                post_id: data++,
+                date_posted: new Date(),
+                upvotes: 0,
+                downvotes: 0,
+                title: title,
+                user: this.username,
+                content: content,
+                subreddit: subreddit,
+                comments: []
+            }
+            // this.posts.push(post);
+            socket.emit('UserCreateNewPost',post);
+            store.incrementPostCount;
+            return post
+        });
     },
     deletePost : function(post_id) {
         this.posts.pop(post_id)

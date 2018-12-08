@@ -241,7 +241,7 @@ Emitter.prototype.hasListeners = function(event){
  */
 
 var keys = __webpack_require__(48);
-var hasBinary = __webpack_require__(22);
+var hasBinary = __webpack_require__(25);
 var sliceBuffer = __webpack_require__(50);
 var after = __webpack_require__(51);
 var utf8 = __webpack_require__(52);
@@ -848,12 +848,12 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__dom_functions__ = __webpack_require__(30);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_prototype__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__dom_functions__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_prototype__ = __webpack_require__(9);
 
 
 
-var io = __webpack_require__(14);
+var io = __webpack_require__(17);
 var socket = io.connect("http://127.0.0.1:8081");
 
 var post_count = 1;
@@ -894,7 +894,7 @@ var store = {
         return currentUser;
     },
     setCurrentUser: function setCurrentUser(username) {
-        // this thing isn't working
+        // complete
         store.getUsers.then(function (users) {
             var foundUserIndex = users.map(function (e) {
                 if (e.username == username) {
@@ -906,11 +906,13 @@ var store = {
         });
     },
     addUser: function addUser(user) {
+        // complete-ish
         socket.emit('newUser', user);
         window.location.reload(); // temp maybe
     },
     // POSTS
-    getPostCount: function getPostCount() {
+    getPostCount: new Promise(function () {
+        // complete
         socket.emit('getPostCount');
         var postCount;
         socket.on('getPostCount', function (data) {
@@ -919,25 +921,161 @@ var store = {
             postCount = data;
         });
         return postCount;
-    },
-    incrementPostCount: function incrementPostCount() {
+    }),
+    incrementPostCount: new Promise(function () {
+        // complete
         socket.emit('incrementPostCount', function (data) {
             console.log("incremented post count: " + data);
         });
-    },
+        socket.on('incrementedPostCount', function (data) {
+            console.log('server returned post count: ' + data);
+        });
+    }),
 
-    getCommentCount: function getCommentCount() {
-        return comment_count;
-    },
-    incrementCommentCount: function incrementCommentCount() {
-        return comment_count++;
-    }
+    getCommentCount: new Promise(function () {
+        console.log("-- getCommentCount --");
+        socket.emit('getCommentCount');
+        var commentCount;
+        socket.on('getCommentCount', function (data) {
+            console.log(data);
+            commentCount = data;
+        });
+        return commentCount;
+    }),
+    incrementCommentCount: new Promise(function () {
+        // complete
+        socket.emit('incrementCommentCount', function (data) {
+            console.log("incremented Comment count: " + data);
+        });
+        socket.on('incrementedCommentCount', function (data) {
+            console.log('server returned Comment count: ' + data);
+        });
+    })
 };
 
 /* harmony default export */ __webpack_exports__["a"] = (store);
 
 /***/ }),
 /* 3 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__dom_objects__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__store__ = __webpack_require__(2);
+// COMPONENT MACROS
+
+
+
+
+// function sortPosts(sortType) {}
+var DOMFuncs;
+/* harmony default export */ __webpack_exports__["a"] = (DOMFuncs = {
+    drawAllPosts: function drawAllPosts(sortedPosts) {
+        __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getAllPosts().forEach(function (post) {
+            __WEBPACK_IMPORTED_MODULE_0__dom_objects__["a" /* default */].insertTop(__WEBPACK_IMPORTED_MODULE_0__dom_objects__["a" /* default */].drawPost(post.post_id));
+        });
+    },
+
+    populateUsersDropdown: function populateUsersDropdown() {
+        $("[hook-js=select-user]").children().remove();
+        __WEBPACK_IMPORTED_MODULE_2__store__["a" /* default */].getUsers.then(function (data) {
+            data.forEach(function (user) {
+                //console.log('user',user);
+                $("[hook-js=select-user]").append($('\n                        <option value="' + user.username + '">\n                            ' + user.username + '\n                        </option>\n                    '));
+            });
+        });
+    }
+});
+
+/***/ }),
+/* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__store__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_prototype__ = __webpack_require__(9);
+
+
+
+// admin functions
+/* harmony default export */ __webpack_exports__["a"] = ((function () {
+    var Admin = {
+        createUser: function createUser(username, password) {
+            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getUsers().push(new __WEBPACK_IMPORTED_MODULE_1__user_prototype__["a" /* default */](username, password));
+        },
+
+        findUser: function findUser(username) {
+            return __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getUsers().find(function (user) {
+                return user.username == username;
+            });
+        },
+
+        // Post functions
+
+        getAllPosts: function getAllPosts() {
+            var allPosts = [];
+            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getUsers().forEach(function (user) {
+                user.posts.forEach(function (post) {
+                    allPosts.push(post);
+                });
+            });
+            return allPosts;
+        },
+
+        getThisPost: function getThisPost(post_id) {
+            return Admin.getAllPosts().find(function (post) {
+                return post.post_id == post_id;
+            });
+        },
+
+        getThisPostSub: function getThisPostSub(post_id) {
+            return Admin.getAllPosts().find(function (post) {
+                return post.post_id == post_id;
+            }).subreddit;
+        },
+
+        getUserFromPost: function getUserFromPost(post_id) {
+            var thisPost = Admin.getAllPosts().find(function (post) {
+                return post.post_id == post_id;
+            });
+            return thisPost.user;
+        },
+
+        sortByVotes: function sortByVotes(type, id) {},
+
+        // Comment functions
+
+        getAllComments: function getAllComments() {
+            var allComments = [];
+            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getUsers().forEach(function (user) {
+                user.comments.forEach(function (comment) {
+                    allComments.push(comment);
+                });
+            });
+            return allComments;
+        },
+
+        getThisComment: function getThisComment(comment_id) {
+            return Admin.getAllComments().find(function (comment) {
+                return comment.comment_id == comment_id;
+            });
+        }
+    };
+    return Admin;
+})());
+
+// sample users
+//createUser("charlie","pass");
+//createUser("coolguy1","hunter2");
+
+
+// export {Admin};
+//export var k = 1;
+//export default "TEST";
+
+/***/ }),
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {/**
@@ -1136,10 +1274,10 @@ function localstorage() {
   } catch (e) {}
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
 
 /***/ }),
-/* 4 */
+/* 6 */
 /***/ (function(module, exports) {
 
 /**
@@ -1182,7 +1320,7 @@ exports.decode = function(qs){
 
 
 /***/ }),
-/* 5 */
+/* 7 */
 /***/ (function(module, exports) {
 
 
@@ -1194,7 +1332,7 @@ module.exports = function(a, b){
 };
 
 /***/ }),
-/* 6 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {/**
@@ -1393,96 +1531,166 @@ function localstorage() {
   } catch (e) {}
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = User;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__store__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_prototype__ = __webpack_require__(28);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__ = __webpack_require__(4);
 
 
 
-// admin functions
-/* harmony default export */ __webpack_exports__["a"] = ((function () {
-    var Admin = {
-        createUser: function createUser(username, password) {
-            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getUsers().push(new __WEBPACK_IMPORTED_MODULE_1__user_prototype__["a" /* default */](username, password));
-        },
+var io = __webpack_require__(17);
+var socket = io.connect("http://127.0.0.1:8081");
 
-        findUser: function findUser(username) {
-            return __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getUsers().find(function (user) {
-                return user.username == username;
-            });
-        },
+// User Constructor
+function User(username, password, date_created, comments, comment_votes, posts, post_votes) {
+    this.username = username;
+    this.password = password;
+    if (date_created) {
+        this.date_created = date_created;
+        this.comments = comments;
+        this.comment_votes = {
+            up: comment_votes.up,
+            down: comment_votes.down
+        };
+        this.posts = posts;
+        this.post_votes = {
+            up: post_votes.up,
+            down: post_votes.down
+        };
+    } else {
+        this.date_created = new Date();
+        this.comments = [];
+        this.comment_votes = {
+            up: [],
+            down: []
+        };
+        this.posts = [];
+        this.post_votes = {
+            up: [],
+            down: []
+        };
+    }
+    console.log(this);
+}
 
-        // Post functions
+User.prototype = {
+    createPost: function createPost(subreddit, title, content) {
+        __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getPostCount.then(function (data) {
+            var post = {
+                post_id: data++,
+                date_posted: new Date(),
+                upvotes: 0,
+                downvotes: 0,
+                title: title,
+                user: this.username,
+                content: content,
+                subreddit: subreddit,
+                comments: []
+                // this.posts.push(post);
+            };socket.emit('UserCreateNewPost', post);
+            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].incrementPostCount;
+            return post;
+        });
+    },
+    deletePost: function deletePost(post_id) {
+        this.posts.pop(post_id);
+    },
+    createComment: function createComment(post_id, content) {
+        var comment = {
+            user: this.username,
+            comment_id: __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getCommentCount(),
+            post_id: post_id,
+            date_posted: new Date(),
+            upvotes: 0,
+            downvotes: 0,
+            content: content,
+            subreddit: __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPostSub(post_id)
+            // commit comment to user
+        };this.comments.push(comment);
+        __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].incrementCommentCount();
 
-        getAllPosts: function getAllPosts() {
-            var allPosts = [];
-            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getUsers().forEach(function (user) {
-                user.posts.forEach(function (post) {
-                    allPosts.push(post);
-                });
-            });
-            return allPosts;
-        },
-
-        getThisPost: function getThisPost(post_id) {
-            return Admin.getAllPosts().find(function (post) {
+        // pass this comment to the post it's linked to
+        __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(post_id).comments.push(comment);
+        return comment.comment_id;
+    },
+    downvotePost: function downvotePost(post_id) {
+        if (this.votes.down.find(function (downvotedPost) {
+            return downvotedPost == post_id;
+        })) {
+            console.log("this user has already voted on this post");
+            return;
+        } else {
+            var allPosts = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getAllPosts();
+            var thisPost = allPosts.find(function (post) {
                 return post.post_id == post_id;
             });
-        },
 
-        getThisPostSub: function getThisPostSub(post_id) {
-            return Admin.getAllPosts().find(function (post) {
-                return post.post_id == post_id;
-            }).subreddit;
-        },
-
-        getUserFromPost: function getUserFromPost(post_id) {
-            var thisPost = Admin.getAllPosts().find(function (post) {
-                return post.post_id == post_id;
-            });
-            return thisPost.user;
-        },
-
-        sortByVotes: function sortByVotes(type, id) {},
-
-        // Comment functions
-
-        getAllComments: function getAllComments() {
-            var allComments = [];
-            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getUsers().forEach(function (user) {
-                user.comments.forEach(function (comment) {
-                    allComments.push(comment);
-                });
-            });
-            return allComments;
-        },
-
-        getThisComment: function getThisComment(comment_id) {
-            return Admin.getAllComments().find(function (comment) {
-                return comment.comment_id == comment_id;
-            });
+            thisPost.downvotes++;
+            this.votes.down.push(post_id);
+            console.log('this post was downvoted', thisPost);
         }
-    };
-    return Admin;
-})());
+    },
+    // User.upvote('post',1)
+    upvote: function upvote(type, thing_id) {
+        if (this.votes.up.find(function (upvoted) {
+            return upvoted == thing_id;
+        })) {
+            console.log("this user has already voted on this " + type);
+            return;
+        } else {
+            var thisThing = void 0;
+            switch (type) {
+                case 'post':
+                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(thing_id);break;
+                case 'comment':
+                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisComment(thing_id);break;
+            }
+            if (!thisThing) {
+                console.log('That ' + type + ' doesn\'t exist!');
+                return;
+            }
+            console.log(type);
+            console.log("upvote()", thisThing);
+            thisThing.upvotes++;
+            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getCurrentUser().votes.up.push(thing_id);
+            console.log('this post was upvoted', thisThing);
+        }
+    },
 
-// sample users
-//createUser("charlie","pass");
-//createUser("coolguy1","hunter2");
-
-
-// export {Admin};
-//export var k = 1;
-//export default "TEST";
+    downvote: function downvote(type, thing_id) {
+        if (this.votes.down.find(function (downvoted) {
+            return downvoted == thing_id;
+        })) {
+            console.log("this user has already voted on this " + type);
+            return;
+        } else {
+            var thisThing = void 0;
+            switch (type) {
+                case 'post':
+                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(thing_id);break;
+                case 'comment':
+                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisComment(thing_id);break;
+            }
+            if (!thisThing) {
+                console.log('That ' + type + ' doesn\'t exist!');
+                return;
+            }
+            console.log("downvote()", thisThing);
+            thisThing.downvotes++;
+            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getCurrentUser().votes.down.push(thing_id);
+            console.log('this post was downvoted', thisThing);
+        }
+    }
+};
 
 /***/ }),
-/* 8 */
+/* 10 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -1672,7 +1880,7 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 9 */
+/* 11 */
 /***/ (function(module, exports) {
 
 /**
@@ -1830,7 +2038,7 @@ function plural(ms, n, name) {
 
 
 /***/ }),
-/* 10 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -1841,8 +2049,8 @@ function plural(ms, n, name) {
 var debug = __webpack_require__(38)('socket.io-parser');
 var Emitter = __webpack_require__(0);
 var binary = __webpack_require__(40);
-var isArray = __webpack_require__(16);
-var isBuf = __webpack_require__(17);
+var isArray = __webpack_require__(19);
+var isBuf = __webpack_require__(20);
 
 /**
  * Protocol version.
@@ -2251,7 +2459,7 @@ function error(msg) {
 
 
 /***/ }),
-/* 11 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4045,10 +4253,10 @@ function isnan (val) {
   return val !== val // eslint-disable-line no-self-compare
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(18)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(21)))
 
 /***/ }),
-/* 12 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // browser shim for xmlhttprequest module
@@ -4091,7 +4299,7 @@ module.exports = function (opts) {
 
 
 /***/ }),
-/* 13 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -4257,7 +4465,115 @@ Transport.prototype.onClose = function () {
 
 
 /***/ }),
-/* 14 */
+/* 16 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__user_adminFunctions__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__store__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__dom_functions__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__user_prototype__ = __webpack_require__(9);
+
+
+
+
+
+var DOMponents;
+/* harmony default export */ __webpack_exports__["a"] = (DOMponents = {
+    insertTop: function insertTop(element) {
+        $("[hook-js=display]").prepend(element);
+    },
+    insertAfter: function insertAfter(element, prevSibling) {
+        $(prevSibling).after(element);
+    },
+    reinsert: function reinsert(element) {
+        var prevElement = $(element).prev();
+        var nextElement = $(element).next();
+        var thisPostId = $(element).data("postId");
+        $(element).remove();
+        if (prevElement.length) {
+            prevElement.after(DOMponents.drawPost(thisPostId));
+        } else if (nextElement.length) {
+            nextElement.before(DOMponents.drawPost(thisPostId));
+        } else {
+            DOMponents.insertTop(DOMponents.drawPost(thisPostId));
+        }
+    },
+    drawPost: function drawPost(post_id) {
+        var post = __WEBPACK_IMPORTED_MODULE_0__user_adminFunctions__["a" /* default */].getThisPost(post_id);
+
+        var renderedPost = $('\n            <div class="post" data-post-id="' + post.post_id + '">\n                <div class="post__votes__wrap">\n                    <button class="post__votes__upvote" post-js="upvote">' + post.upvotes + '</button>\n                    <button class="post__votes__downvote" post-js="downvote">' + post.downvotes + '</button>\n                </div>\n                <div class="post__main">\n                    <h3 class="post__header">' + post.title + '</h3>\n                    <div class="post__details">\n                        <span class="post__detail">' + post.subreddit + '</span>\n                        <span class="post__detail">' + post.user + '</span>\n                        <span class="post__detail">Date posted: \n                            ' + post.date_posted.getDate() + '.' + post.date_posted.getMonth() + '.' + post.date_posted.getFullYear() + '\n                            at \n                            ' + post.date_posted.getHours() + ':' + post.date_posted.getMinutes() + '\n                        </span>\n                    </div>\n                    <div class="post__controls">\n                        <span>\n                            <label for="showPost-' + post.post_id + '">Show Post</label>\n                            <input type="checkbox" name="showPost" id="showPost-' + post.post_id + '">\n                            <div class="post__content">\n                                ' + post.content + '\n                                <div>\n                                    <label for="showComments-' + post.post_id + '">Show Comments</label>\n                                    <input type="checkbox" name="showComments" id="showComments-' + post.post_id + '">\n                                    <button class="post__controls__btn" post-js="create-comment">Post Comment</button>\n                                    <div class="post__comments">\n                                        ' + post.comments.map(function (comment) {
+            return '<span><strong>' + comment.user + ': </strong>' + comment.content + '</span>';
+        }).join('<br />') + '\n                                    </div>\n                                </div>\n                            </div>\n                        </span>\n                    </div>\n                </div>\n            </div>\n        ');
+        return renderedPost;
+    },
+
+    NewPostModal: {
+        draw: function draw() {
+            $("body").append($('\n                <section class="modal__wrap" data-user="' + __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().username + '" modal-js="modal">\n                    <div class="modal">\n                        <h1>New Post</h1>\n                        <form onSubmit="e.preventDefault">\n                            <label for="title">Title</label>\n                            <input type="text" id="title">\n                            <label for="sub">Subreddit</label>\n                            <input type="text" id="sub">\n                            <label for="content">Content</label>\n                            <textarea name="" id="content" cols="30" rows="10"></textarea>\n                            <button modal-js="submit-post">Submit</button>\n                        </form>\n                    </div>\n                </section>\n            '));
+            $('[modal-js=submit-post]').on('click', function (e) {
+                DOMponents.NewPostModal.submit(e);
+            });
+        },
+
+        submit: function submit(e) {
+            e.preventDefault();
+            var $form = $('[modal-js=modal]').children().children("form");
+            var input = {
+                title: $form.children("#title").val(),
+                subreddit: $form.children("#sub").val(),
+                content: $form.children("#content").val()
+            };
+            var newPost = __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().createPost(input.subreddit, input.title, input.content);
+
+            DOMponents.insertTop(DOMponents.drawPost(newPost.post_id));
+            $('[modal-js=modal]').remove();
+        }
+    },
+
+    NewCommentModal: {
+        draw: function draw(post) {
+            $("body").append($('\n                <section class="modal__wrap" data-user="' + __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().username + '" modal-js="modal">\n                    <div class="modal">\n                        <h1>New Comment : Post ' + post.post_id + '</h1>\n                        <form onSubmit="e.preventDefault">\n                            <label for="content">Content</label>\n                            <textarea name="" id="content" cols="30" rows="10"></textarea>\n                            <button modal-js="submit-comment">Submit</button>\n                        </form>\n                    </div>\n                </section>\n            '));
+            $('[modal-js=submit-comment]').on('click', function (e) {
+                e.preventDefault();
+                DOMponents.NewCommentModal.submit(post);
+            });
+        },
+
+        submit: function submit(post) {
+            __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().createComment(post.post_id, $("#content").val());
+
+            $('[modal-js=modal]').remove();
+            DOMponents.reinsert('[data-post-id=' + post.post_id + ']');
+        }
+    },
+
+    NewUserModal: {
+        draw: function draw() {
+            $("body").append($('\n                <section class="modal__wrap" data-user="' + __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().username + '" modal-js="modal">\n                    <div class="modal">\n                        <h1>New User</h1>\n                        <form onSubmit="e.preventDefault">\n                            <label for="username">Username</label>\n                            <input type="text" id="username">\n                            <label for="password">Password</label>\n                            <input type="text" id="password">\n                            <button modal-js="submit-user">Submit</button>\n                        </form>\n                    </div>\n                </section>\n            '));
+            $('[modal-js=submit-user]').on('click', function (e) {
+                e.preventDefault();
+                DOMponents.NewUserModal.submit();
+            });
+        },
+        submit: function submit() {
+            var $form = $('[modal-js=modal]').children().children("form");
+            var input = {
+                username: $form.children("#username").val(),
+                password: $form.children("#password").val()
+            };
+            $('[modal-js=modal]').remove();
+            var newUser = new __WEBPACK_IMPORTED_MODULE_3__user_prototype__["a" /* default */](input.username, input.password);
+            console.log(newUser);
+            __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].addUser(newUser);
+            console.log(__WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getUsers);
+            __WEBPACK_IMPORTED_MODULE_2__dom_functions__["a" /* default */].populateUsersDropdown();
+        }
+    }
+});
+
+/***/ }),
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -4266,9 +4582,9 @@ Transport.prototype.onClose = function () {
  */
 
 var url = __webpack_require__(36);
-var parser = __webpack_require__(10);
-var Manager = __webpack_require__(19);
-var debug = __webpack_require__(3)('socket.io-client');
+var parser = __webpack_require__(12);
+var Manager = __webpack_require__(22);
+var debug = __webpack_require__(5)('socket.io-client');
 
 /**
  * Module exports.
@@ -4352,12 +4668,12 @@ exports.connect = lookup;
  * @api public
  */
 
-exports.Manager = __webpack_require__(19);
-exports.Socket = __webpack_require__(25);
+exports.Manager = __webpack_require__(22);
+exports.Socket = __webpack_require__(28);
 
 
 /***/ }),
-/* 15 */
+/* 18 */
 /***/ (function(module, exports) {
 
 /**
@@ -4402,7 +4718,7 @@ module.exports = function parseuri(str) {
 
 
 /***/ }),
-/* 16 */
+/* 19 */
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -4413,7 +4729,7 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
-/* 17 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(Buffer) {
@@ -4437,10 +4753,10 @@ function isBuf(obj) {
           (withNativeArrayBuffer && (obj instanceof ArrayBuffer || isView(obj)));
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11).Buffer))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13).Buffer))
 
 /***/ }),
-/* 18 */
+/* 21 */
 /***/ (function(module, exports) {
 
 var g;
@@ -4467,7 +4783,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 19 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -4476,13 +4792,13 @@ module.exports = g;
  */
 
 var eio = __webpack_require__(44);
-var Socket = __webpack_require__(25);
+var Socket = __webpack_require__(28);
 var Emitter = __webpack_require__(0);
-var parser = __webpack_require__(10);
-var on = __webpack_require__(26);
-var bind = __webpack_require__(27);
-var debug = __webpack_require__(3)('socket.io-client:manager');
-var indexOf = __webpack_require__(24);
+var parser = __webpack_require__(12);
+var on = __webpack_require__(29);
+var bind = __webpack_require__(30);
+var debug = __webpack_require__(5)('socket.io-client:manager');
+var indexOf = __webpack_require__(27);
 var Backoff = __webpack_require__(60);
 
 /**
@@ -5046,14 +5362,14 @@ Manager.prototype.onreconnect = function () {
 
 
 /***/ }),
-/* 20 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
  * Module dependencies
  */
 
-var XMLHttpRequest = __webpack_require__(12);
+var XMLHttpRequest = __webpack_require__(14);
 var XHR = __webpack_require__(47);
 var JSONP = __webpack_require__(56);
 var websocket = __webpack_require__(57);
@@ -5105,19 +5421,19 @@ function polling (opts) {
 
 
 /***/ }),
-/* 21 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
  * Module dependencies.
  */
 
-var Transport = __webpack_require__(13);
-var parseqs = __webpack_require__(4);
+var Transport = __webpack_require__(15);
+var parseqs = __webpack_require__(6);
 var parser = __webpack_require__(1);
-var inherit = __webpack_require__(5);
-var yeast = __webpack_require__(23);
-var debug = __webpack_require__(6)('engine.io-client:polling');
+var inherit = __webpack_require__(7);
+var yeast = __webpack_require__(26);
+var debug = __webpack_require__(8)('engine.io-client:polling');
 
 /**
  * Module exports.
@@ -5130,7 +5446,7 @@ module.exports = Polling;
  */
 
 var hasXHR2 = (function () {
-  var XMLHttpRequest = __webpack_require__(12);
+  var XMLHttpRequest = __webpack_require__(14);
   var xhr = new XMLHttpRequest({ xdomain: false });
   return null != xhr.responseType;
 })();
@@ -5356,7 +5672,7 @@ Polling.prototype.uri = function () {
 
 
 /***/ }),
-/* 22 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(Buffer) {/* global Blob File */
@@ -5424,10 +5740,10 @@ function hasBinary (obj) {
   return false;
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11).Buffer))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13).Buffer))
 
 /***/ }),
-/* 23 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5502,7 +5818,7 @@ module.exports = yeast;
 
 
 /***/ }),
-/* 24 */
+/* 27 */
 /***/ (function(module, exports) {
 
 
@@ -5517,7 +5833,7 @@ module.exports = function(arr, obj){
 };
 
 /***/ }),
-/* 25 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -5525,14 +5841,14 @@ module.exports = function(arr, obj){
  * Module dependencies.
  */
 
-var parser = __webpack_require__(10);
+var parser = __webpack_require__(12);
 var Emitter = __webpack_require__(0);
 var toArray = __webpack_require__(59);
-var on = __webpack_require__(26);
-var bind = __webpack_require__(27);
-var debug = __webpack_require__(3)('socket.io-client:socket');
-var parseqs = __webpack_require__(4);
-var hasBin = __webpack_require__(22);
+var on = __webpack_require__(29);
+var bind = __webpack_require__(30);
+var debug = __webpack_require__(5)('socket.io-client:socket');
+var parseqs = __webpack_require__(6);
+var hasBin = __webpack_require__(25);
 
 /**
  * Module exports.
@@ -5961,7 +6277,7 @@ Socket.prototype.binary = function (binary) {
 
 
 /***/ }),
-/* 26 */
+/* 29 */
 /***/ (function(module, exports) {
 
 
@@ -5991,7 +6307,7 @@ function on (obj, ev, fn) {
 
 
 /***/ }),
-/* 27 */
+/* 30 */
 /***/ (function(module, exports) {
 
 /**
@@ -6020,298 +6336,6 @@ module.exports = function(obj, fn){
 
 
 /***/ }),
-/* 28 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = User;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__store__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__ = __webpack_require__(7);
-
-
-
-// User Constructor
-function User(username, password, date_created, comments, comment_votes, posts, post_votes) {
-    this.username = username;
-    this.password = password;
-    if (date_created) {
-        this.date_created = date_created;
-        this.comments = comments;
-        this.comment_votes = {
-            up: comment_votes.up,
-            down: comment_votes.down
-        };
-        this.posts = posts;
-        this.post_votes = {
-            up: post_votes.up,
-            down: post_votes.down
-        };
-    } else {
-        this.date_created = new Date();
-        this.comments = [];
-        this.comment_votes = {
-            up: [],
-            down: []
-        };
-        this.posts = [];
-        this.post_votes = {
-            up: [],
-            down: []
-        };
-    }
-    console.log(this);
-}
-
-User.prototype = {
-    createPost: function createPost(subreddit, title, content) {
-        var post = {
-            post_id: __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getPostCount(),
-            date_posted: new Date(),
-            upvotes: 0,
-            downvotes: 0,
-            title: title,
-            user: this.username,
-            content: content,
-            subreddit: subreddit,
-            comments: []
-        };
-        this.posts.push(post);
-        __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].incrementPostCount();
-        return post;
-    },
-    deletePost: function deletePost(post_id) {
-        this.posts.pop(post_id);
-    },
-    createComment: function createComment(post_id, content) {
-        var comment = {
-            user: this.username,
-            comment_id: __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getCommentCount(),
-            post_id: post_id,
-            date_posted: new Date(),
-            upvotes: 0,
-            downvotes: 0,
-            content: content,
-            subreddit: __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPostSub(post_id)
-            // commit comment to user
-        };this.comments.push(comment);
-        __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].incrementCommentCount();
-
-        // pass this comment to the post it's linked to
-        __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(post_id).comments.push(comment);
-        return comment.comment_id;
-    },
-    downvotePost: function downvotePost(post_id) {
-        if (this.votes.down.find(function (downvotedPost) {
-            return downvotedPost == post_id;
-        })) {
-            console.log("this user has already voted on this post");
-            return;
-        } else {
-            var allPosts = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getAllPosts();
-            var thisPost = allPosts.find(function (post) {
-                return post.post_id == post_id;
-            });
-
-            thisPost.downvotes++;
-            this.votes.down.push(post_id);
-            console.log('this post was downvoted', thisPost);
-        }
-    },
-    // User.upvote('post',1)
-    upvote: function upvote(type, thing_id) {
-        if (this.votes.up.find(function (upvoted) {
-            return upvoted == thing_id;
-        })) {
-            console.log("this user has already voted on this " + type);
-            return;
-        } else {
-            var thisThing = void 0;
-            switch (type) {
-                case 'post':
-                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(thing_id);break;
-                case 'comment':
-                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisComment(thing_id);break;
-            }
-            if (!thisThing) {
-                console.log('That ' + type + ' doesn\'t exist!');
-                return;
-            }
-            console.log(type);
-            console.log("upvote()", thisThing);
-            thisThing.upvotes++;
-            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getCurrentUser().votes.up.push(thing_id);
-            console.log('this post was upvoted', thisThing);
-        }
-    },
-
-    downvote: function downvote(type, thing_id) {
-        if (this.votes.down.find(function (downvoted) {
-            return downvoted == thing_id;
-        })) {
-            console.log("this user has already voted on this " + type);
-            return;
-        } else {
-            var thisThing = void 0;
-            switch (type) {
-                case 'post':
-                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisPost(thing_id);break;
-                case 'comment':
-                    thisThing = __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getThisComment(thing_id);break;
-            }
-            if (!thisThing) {
-                console.log('That ' + type + ' doesn\'t exist!');
-                return;
-            }
-            console.log("downvote()", thisThing);
-            thisThing.downvotes++;
-            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getCurrentUser().votes.down.push(thing_id);
-            console.log('this post was downvoted', thisThing);
-        }
-    }
-};
-
-/***/ }),
-/* 29 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__user_adminFunctions__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__store__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__dom_functions__ = __webpack_require__(30);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__user_prototype__ = __webpack_require__(28);
-
-
-
-
-
-var DOMponents;
-/* harmony default export */ __webpack_exports__["a"] = (DOMponents = {
-    insertTop: function insertTop(element) {
-        $("[hook-js=display]").prepend(element);
-    },
-    insertAfter: function insertAfter(element, prevSibling) {
-        $(prevSibling).after(element);
-    },
-    reinsert: function reinsert(element) {
-        var prevElement = $(element).prev();
-        var nextElement = $(element).next();
-        var thisPostId = $(element).data("postId");
-        $(element).remove();
-        if (prevElement.length) {
-            prevElement.after(DOMponents.drawPost(thisPostId));
-        } else if (nextElement.length) {
-            nextElement.before(DOMponents.drawPost(thisPostId));
-        } else {
-            DOMponents.insertTop(DOMponents.drawPost(thisPostId));
-        }
-    },
-    drawPost: function drawPost(post_id) {
-        var post = __WEBPACK_IMPORTED_MODULE_0__user_adminFunctions__["a" /* default */].getThisPost(post_id);
-
-        var renderedPost = $('\n            <div class="post" data-post-id="' + post.post_id + '">\n                <div class="post__votes__wrap">\n                    <button class="post__votes__upvote" post-js="upvote">' + post.upvotes + '</button>\n                    <button class="post__votes__downvote" post-js="downvote">' + post.downvotes + '</button>\n                </div>\n                <div class="post__main">\n                    <h3 class="post__header">' + post.title + '</h3>\n                    <div class="post__details">\n                        <span class="post__detail">' + post.subreddit + '</span>\n                        <span class="post__detail">' + post.user + '</span>\n                        <span class="post__detail">Date posted: \n                            ' + post.date_posted.getDate() + '.' + post.date_posted.getMonth() + '.' + post.date_posted.getFullYear() + '\n                            at \n                            ' + post.date_posted.getHours() + ':' + post.date_posted.getMinutes() + '\n                        </span>\n                    </div>\n                    <div class="post__controls">\n                        <span>\n                            <label for="showPost-' + post.post_id + '">Show Post</label>\n                            <input type="checkbox" name="showPost" id="showPost-' + post.post_id + '">\n                            <div class="post__content">\n                                ' + post.content + '\n                                <div>\n                                    <label for="showComments-' + post.post_id + '">Show Comments</label>\n                                    <input type="checkbox" name="showComments" id="showComments-' + post.post_id + '">\n                                    <button class="post__controls__btn" post-js="create-comment">Post Comment</button>\n                                    <div class="post__comments">\n                                        ' + post.comments.map(function (comment) {
-            return '<span><strong>' + comment.user + ': </strong>' + comment.content + '</span>';
-        }).join('<br />') + '\n                                    </div>\n                                </div>\n                            </div>\n                        </span>\n                    </div>\n                </div>\n            </div>\n        ');
-        return renderedPost;
-    },
-
-    NewPostModal: {
-        draw: function draw() {
-            $("body").append($('\n                <section class="modal__wrap" data-user="' + __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().username + '" modal-js="modal">\n                    <div class="modal">\n                        <h1>New Post</h1>\n                        <form onSubmit="e.preventDefault">\n                            <label for="title">Title</label>\n                            <input type="text" id="title">\n                            <label for="sub">Subreddit</label>\n                            <input type="text" id="sub">\n                            <label for="content">Content</label>\n                            <textarea name="" id="content" cols="30" rows="10"></textarea>\n                            <button modal-js="submit-post">Submit</button>\n                        </form>\n                    </div>\n                </section>\n            '));
-            $('[modal-js=submit-post]').on('click', function (e) {
-                DOMponents.NewPostModal.submit(e);
-            });
-        },
-
-        submit: function submit(e) {
-            e.preventDefault();
-            var $form = $('[modal-js=modal]').children().children("form");
-            var input = {
-                title: $form.children("#title").val(),
-                subreddit: $form.children("#sub").val(),
-                content: $form.children("#content").val()
-            };
-            var newPost = __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().createPost(input.subreddit, input.title, input.content);
-
-            DOMponents.insertTop(DOMponents.drawPost(newPost.post_id));
-            $('[modal-js=modal]').remove();
-        }
-    },
-
-    NewCommentModal: {
-        draw: function draw(post) {
-            $("body").append($('\n                <section class="modal__wrap" data-user="' + __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().username + '" modal-js="modal">\n                    <div class="modal">\n                        <h1>New Comment : Post ' + post.post_id + '</h1>\n                        <form onSubmit="e.preventDefault">\n                            <label for="content">Content</label>\n                            <textarea name="" id="content" cols="30" rows="10"></textarea>\n                            <button modal-js="submit-comment">Submit</button>\n                        </form>\n                    </div>\n                </section>\n            '));
-            $('[modal-js=submit-comment]').on('click', function (e) {
-                e.preventDefault();
-                DOMponents.NewCommentModal.submit(post);
-            });
-        },
-
-        submit: function submit(post) {
-            __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().createComment(post.post_id, $("#content").val());
-
-            $('[modal-js=modal]').remove();
-            DOMponents.reinsert('[data-post-id=' + post.post_id + ']');
-        }
-    },
-
-    NewUserModal: {
-        draw: function draw() {
-            $("body").append($('\n                <section class="modal__wrap" data-user="' + __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getCurrentUser().username + '" modal-js="modal">\n                    <div class="modal">\n                        <h1>New User</h1>\n                        <form onSubmit="e.preventDefault">\n                            <label for="username">Username</label>\n                            <input type="text" id="username">\n                            <label for="password">Password</label>\n                            <input type="text" id="password">\n                            <button modal-js="submit-user">Submit</button>\n                        </form>\n                    </div>\n                </section>\n            '));
-            $('[modal-js=submit-user]').on('click', function (e) {
-                e.preventDefault();
-                DOMponents.NewUserModal.submit();
-            });
-        },
-        submit: function submit() {
-            var $form = $('[modal-js=modal]').children().children("form");
-            var input = {
-                username: $form.children("#username").val(),
-                password: $form.children("#password").val()
-            };
-            $('[modal-js=modal]').remove();
-            var newUser = new __WEBPACK_IMPORTED_MODULE_3__user_prototype__["a" /* default */](input.username, input.password);
-            console.log(newUser);
-            __WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].addUser(newUser);
-            console.log(__WEBPACK_IMPORTED_MODULE_1__store__["a" /* default */].getUsers);
-            __WEBPACK_IMPORTED_MODULE_2__dom_functions__["a" /* default */].populateUsersDropdown();
-        }
-    }
-});
-
-/***/ }),
-/* 30 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__dom_objects__ = __webpack_require__(29);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__store__ = __webpack_require__(2);
-// COMPONENT MACROS
-
-
-
-
-// function sortPosts(sortType) {}
-var DOMFuncs;
-/* harmony default export */ __webpack_exports__["a"] = (DOMFuncs = {
-    drawAllPosts: function drawAllPosts(sortedPosts) {
-        __WEBPACK_IMPORTED_MODULE_1__user_adminFunctions__["a" /* default */].getAllPosts().forEach(function (post) {
-            __WEBPACK_IMPORTED_MODULE_0__dom_objects__["a" /* default */].insertTop(__WEBPACK_IMPORTED_MODULE_0__dom_objects__["a" /* default */].drawPost(post.post_id));
-        });
-    },
-
-    populateUsersDropdown: function populateUsersDropdown() {
-        $("[hook-js=select-user]").children().remove();
-        __WEBPACK_IMPORTED_MODULE_2__store__["a" /* default */].getUsers.then(function (data) {
-            data.forEach(function (user) {
-                //console.log('user',user);
-                $("[hook-js=select-user]").append($('\n                        <option value="' + user.username + '">\n                            ' + user.username + '\n                        </option>\n                    '));
-            });
-        });
-    }
-});
-
-/***/ }),
 /* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -6328,9 +6352,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__js_jquery__ = __webpack_require__(33);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__js_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__js_jquery__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__js_store__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__js_user_adminFunctions__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__js_dom_objects__ = __webpack_require__(29);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__js_dom_functions__ = __webpack_require__(30);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__js_user_adminFunctions__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__js_dom_objects__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__js_dom_functions__ = __webpack_require__(3);
 /*
 https://github.com/mysqljs/mysql
 https://www.getdonedone.com/building-the-optimal-user-database-model-for-your-application/
@@ -6412,7 +6436,7 @@ var init = function init() {
     WEB SOCKETS
 */
 
-var io = __webpack_require__(14);
+var io = __webpack_require__(17);
 var socket = io.connect("http://127.0.0.1:8081");
 
 socket.on('connect', function () {
@@ -8778,8 +8802,8 @@ module.exports = __webpack_amd_options__;
  * Module dependencies.
  */
 
-var parseuri = __webpack_require__(15);
-var debug = __webpack_require__(3)('socket.io-client:url');
+var parseuri = __webpack_require__(18);
+var debug = __webpack_require__(5)('socket.io-client:url');
 
 /**
  * Module exports.
@@ -8867,7 +8891,7 @@ exports.coerce = coerce;
 exports.disable = disable;
 exports.enable = enable;
 exports.enabled = enabled;
-exports.humanize = __webpack_require__(9);
+exports.humanize = __webpack_require__(11);
 
 /**
  * Active `debug` instances.
@@ -9281,7 +9305,7 @@ function localstorage() {
   } catch (e) {}
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)))
 
 /***/ }),
 /* 39 */
@@ -9300,7 +9324,7 @@ exports.coerce = coerce;
 exports.disable = disable;
 exports.enable = enable;
 exports.enabled = enabled;
-exports.humanize = __webpack_require__(9);
+exports.humanize = __webpack_require__(11);
 
 /**
  * Active `debug` instances.
@@ -9524,8 +9548,8 @@ function coerce(val) {
  * Module requirements
  */
 
-var isArray = __webpack_require__(16);
-var isBuf = __webpack_require__(17);
+var isArray = __webpack_require__(19);
+var isBuf = __webpack_require__(20);
 var toString = Object.prototype.toString;
 var withNativeBlob = typeof Blob === 'function' || (typeof Blob !== 'undefined' && toString.call(Blob) === '[object BlobConstructor]');
 var withNativeFile = typeof File === 'function' || (typeof File !== 'undefined' && toString.call(File) === '[object FileConstructor]');
@@ -9944,13 +9968,13 @@ module.exports.parser = __webpack_require__(1);
  * Module dependencies.
  */
 
-var transports = __webpack_require__(20);
+var transports = __webpack_require__(23);
 var Emitter = __webpack_require__(0);
-var debug = __webpack_require__(6)('engine.io-client:socket');
-var index = __webpack_require__(24);
+var debug = __webpack_require__(8)('engine.io-client:socket');
+var index = __webpack_require__(27);
 var parser = __webpack_require__(1);
-var parseuri = __webpack_require__(15);
-var parseqs = __webpack_require__(4);
+var parseuri = __webpack_require__(18);
+var parseqs = __webpack_require__(6);
 
 /**
  * Module exports.
@@ -10085,8 +10109,8 @@ Socket.protocol = parser.protocol; // this is an int
  */
 
 Socket.Socket = Socket;
-Socket.Transport = __webpack_require__(13);
-Socket.transports = __webpack_require__(20);
+Socket.Transport = __webpack_require__(15);
+Socket.transports = __webpack_require__(23);
 Socket.parser = __webpack_require__(1);
 
 /**
@@ -10721,11 +10745,11 @@ try {
  * Module requirements.
  */
 
-var XMLHttpRequest = __webpack_require__(12);
-var Polling = __webpack_require__(21);
+var XMLHttpRequest = __webpack_require__(14);
+var Polling = __webpack_require__(24);
 var Emitter = __webpack_require__(0);
-var inherit = __webpack_require__(5);
-var debug = __webpack_require__(6)('engine.io-client:polling-xhr');
+var inherit = __webpack_require__(7);
+var debug = __webpack_require__(8)('engine.io-client:polling-xhr');
 
 /**
  * Module exports.
@@ -11649,7 +11673,7 @@ exports.coerce = coerce;
 exports.disable = disable;
 exports.enable = enable;
 exports.enabled = enabled;
-exports.humanize = __webpack_require__(9);
+exports.humanize = __webpack_require__(11);
 
 /**
  * Active `debug` instances.
@@ -11871,8 +11895,8 @@ function coerce(val) {
  * Module requirements.
  */
 
-var Polling = __webpack_require__(21);
-var inherit = __webpack_require__(5);
+var Polling = __webpack_require__(24);
+var inherit = __webpack_require__(7);
 
 /**
  * Module exports.
@@ -12107,7 +12131,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
   }
 };
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(18)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(21)))
 
 /***/ }),
 /* 57 */
@@ -12117,12 +12141,12 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
  * Module dependencies.
  */
 
-var Transport = __webpack_require__(13);
+var Transport = __webpack_require__(15);
 var parser = __webpack_require__(1);
-var parseqs = __webpack_require__(4);
-var inherit = __webpack_require__(5);
-var yeast = __webpack_require__(23);
-var debug = __webpack_require__(6)('engine.io-client:websocket');
+var parseqs = __webpack_require__(6);
+var inherit = __webpack_require__(7);
+var yeast = __webpack_require__(26);
+var debug = __webpack_require__(8)('engine.io-client:websocket');
 var BrowserWebSocket, NodeWebSocket;
 if (typeof self === 'undefined') {
   try {
@@ -12398,7 +12422,7 @@ WS.prototype.check = function () {
   return !!WebSocket && !('__initialize' in WebSocket && this.name === WS.prototype.name);
 };
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11).Buffer))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13).Buffer))
 
 /***/ }),
 /* 58 */
