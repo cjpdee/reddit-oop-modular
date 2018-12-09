@@ -2,3 +2,5 @@
 *.log
 /*.log
 /dist/sensitive.js
+/dist/app.*
+/dist/index.html
