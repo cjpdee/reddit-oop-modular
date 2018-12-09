@@ -849,11 +849,11 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__dom_functions__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_prototype__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_prototype__ = __webpack_require__(10);
 
 
 
-var io = __webpack_require__(10);
+var io = __webpack_require__(5);
 var socket = io.connect("http://127.0.0.1:8081");
 
 var post_count = 1;
@@ -897,8 +897,8 @@ var store = {
             });
         });
     },
-    addUser: function addUser() {
-        new Promise(function (user) {
+    addUser: function addUser(user) {
+        new Promise(function () {
             // complete-ish
             socket.emit('newUser', user);
 
@@ -1001,18 +1001,25 @@ var DOMFuncs;
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__store__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_prototype__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__user_prototype__ = __webpack_require__(10);
 
 
 
-var io = __webpack_require__(10);
+var io = __webpack_require__(5);
 var socket = io.connect("http://127.0.0.1:8081");
 
 // admin functions
 /* harmony default export */ __webpack_exports__["a"] = ((function () {
     var Admin = {
         createUser: function createUser(username, password) {
-            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getUsers().push(new __WEBPACK_IMPORTED_MODULE_1__user_prototype__["a" /* default */](username, password));
+            __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getUsers().then(function (data) {
+                console.log(data);
+                // let usersArray = Array.parse(data);
+
+                var x = new __WEBPACK_IMPORTED_MODULE_1__user_prototype__["a" /* default */](username, password);
+                __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].addUser(x);
+                resolve();
+            });
         },
 
         findUser: function findUser(username) {
@@ -1106,6 +1113,106 @@ var socket = io.connect("http://127.0.0.1:8081");
 
 /***/ }),
 /* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+/**
+ * Module dependencies.
+ */
+
+var url = __webpack_require__(36);
+var parser = __webpack_require__(13);
+var Manager = __webpack_require__(22);
+var debug = __webpack_require__(6)('socket.io-client');
+
+/**
+ * Module exports.
+ */
+
+module.exports = exports = lookup;
+
+/**
+ * Managers cache.
+ */
+
+var cache = exports.managers = {};
+
+/**
+ * Looks up an existing `Manager` for multiplexing.
+ * If the user summons:
+ *
+ *   `io('http://localhost/a');`
+ *   `io('http://localhost/b');`
+ *
+ * We reuse the existing instance based on same scheme/port/host,
+ * and we initialize sockets for each namespace.
+ *
+ * @api public
+ */
+
+function lookup (uri, opts) {
+  if (typeof uri === 'object') {
+    opts = uri;
+    uri = undefined;
+  }
+
+  opts = opts || {};
+
+  var parsed = url(uri);
+  var source = parsed.source;
+  var id = parsed.id;
+  var path = parsed.path;
+  var sameNamespace = cache[id] && path in cache[id].nsps;
+  var newConnection = opts.forceNew || opts['force new connection'] ||
+                      false === opts.multiplex || sameNamespace;
+
+  var io;
+
+  if (newConnection) {
+    debug('ignoring socket cache for %s', source);
+    io = Manager(source, opts);
+  } else {
+    if (!cache[id]) {
+      debug('new io instance for %s', source);
+      cache[id] = Manager(source, opts);
+    }
+    io = cache[id];
+  }
+  if (parsed.query && !opts.query) {
+    opts.query = parsed.query;
+  }
+  return io.socket(parsed.path, opts);
+}
+
+/**
+ * Protocol version.
+ *
+ * @api public
+ */
+
+exports.protocol = parser.protocol;
+
+/**
+ * `connect`.
+ *
+ * @param {String} uri
+ * @api public
+ */
+
+exports.connect = lookup;
+
+/**
+ * Expose constructors for standalone build.
+ *
+ * @api public
+ */
+
+exports.Manager = __webpack_require__(22);
+exports.Socket = __webpack_require__(28);
+
+
+/***/ }),
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {/**
@@ -1307,7 +1414,7 @@ function localstorage() {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports) {
 
 /**
@@ -1350,7 +1457,7 @@ exports.decode = function(qs){
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports) {
 
 
@@ -1362,7 +1469,7 @@ module.exports = function(a, b){
 };
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {/**
@@ -1564,7 +1671,7 @@ function localstorage() {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1574,7 +1681,7 @@ function localstorage() {
 
 
 
-var io = __webpack_require__(10);
+var io = __webpack_require__(5);
 var socket = io.connect("http://127.0.0.1:8081");
 
 // User Constructor
@@ -1595,17 +1702,18 @@ function User(username, password, date_created, comments, comment_upvotes, comme
         };
     } else {
         this.date_created = new Date();
-        this.comments = [];
+        this.comments = "[]";
         this.comment_votes = {
-            up: [],
-            down: []
+            up: "[]",
+            down: "[]"
         };
-        this.posts = [];
+        this.posts = "[]";
         this.post_votes = {
-            up: [],
-            down: []
+            up: "[]",
+            down: "[]"
         };
     }
+    // store.addUser(this);
 }
 
 User.prototype = {
@@ -1621,7 +1729,7 @@ User.prototype = {
                 user: __WEBPACK_IMPORTED_MODULE_0__store__["a" /* default */].getCurrentUser().username,
                 content: content,
                 subreddit: subreddit,
-                comments: []
+                comments: '[]'
                 // this.posts.push(post);
             };console.log('the post', post);
             socket.emit('userCreateNewPost', post);
@@ -1725,106 +1833,6 @@ User.prototype = {
         }
     }
 };
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-
-/**
- * Module dependencies.
- */
-
-var url = __webpack_require__(36);
-var parser = __webpack_require__(13);
-var Manager = __webpack_require__(22);
-var debug = __webpack_require__(5)('socket.io-client');
-
-/**
- * Module exports.
- */
-
-module.exports = exports = lookup;
-
-/**
- * Managers cache.
- */
-
-var cache = exports.managers = {};
-
-/**
- * Looks up an existing `Manager` for multiplexing.
- * If the user summons:
- *
- *   `io('http://localhost/a');`
- *   `io('http://localhost/b');`
- *
- * We reuse the existing instance based on same scheme/port/host,
- * and we initialize sockets for each namespace.
- *
- * @api public
- */
-
-function lookup (uri, opts) {
-  if (typeof uri === 'object') {
-    opts = uri;
-    uri = undefined;
-  }
-
-  opts = opts || {};
-
-  var parsed = url(uri);
-  var source = parsed.source;
-  var id = parsed.id;
-  var path = parsed.path;
-  var sameNamespace = cache[id] && path in cache[id].nsps;
-  var newConnection = opts.forceNew || opts['force new connection'] ||
-                      false === opts.multiplex || sameNamespace;
-
-  var io;
-
-  if (newConnection) {
-    debug('ignoring socket cache for %s', source);
-    io = Manager(source, opts);
-  } else {
-    if (!cache[id]) {
-      debug('new io instance for %s', source);
-      cache[id] = Manager(source, opts);
-    }
-    io = cache[id];
-  }
-  if (parsed.query && !opts.query) {
-    opts.query = parsed.query;
-  }
-  return io.socket(parsed.path, opts);
-}
-
-/**
- * Protocol version.
- *
- * @api public
- */
-
-exports.protocol = parser.protocol;
-
-/**
- * `connect`.
- *
- * @param {String} uri
- * @api public
- */
-
-exports.connect = lookup;
-
-/**
- * Expose constructors for standalone build.
- *
- * @api public
- */
-
-exports.Manager = __webpack_require__(22);
-exports.Socket = __webpack_require__(28);
-
 
 /***/ }),
 /* 11 */
@@ -4609,7 +4617,7 @@ Transport.prototype.onClose = function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__user_adminFunctions__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__store__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__dom_functions__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__user_prototype__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__user_prototype__ = __webpack_require__(10);
 
 
 
@@ -4834,7 +4842,7 @@ var Emitter = __webpack_require__(0);
 var parser = __webpack_require__(13);
 var on = __webpack_require__(29);
 var bind = __webpack_require__(30);
-var debug = __webpack_require__(5)('socket.io-client:manager');
+var debug = __webpack_require__(6)('socket.io-client:manager');
 var indexOf = __webpack_require__(27);
 var Backoff = __webpack_require__(60);
 
@@ -5466,11 +5474,11 @@ function polling (opts) {
  */
 
 var Transport = __webpack_require__(16);
-var parseqs = __webpack_require__(6);
+var parseqs = __webpack_require__(7);
 var parser = __webpack_require__(1);
-var inherit = __webpack_require__(7);
+var inherit = __webpack_require__(8);
 var yeast = __webpack_require__(26);
-var debug = __webpack_require__(8)('engine.io-client:polling');
+var debug = __webpack_require__(9)('engine.io-client:polling');
 
 /**
  * Module exports.
@@ -5883,8 +5891,8 @@ var Emitter = __webpack_require__(0);
 var toArray = __webpack_require__(59);
 var on = __webpack_require__(29);
 var bind = __webpack_require__(30);
-var debug = __webpack_require__(5)('socket.io-client:socket');
-var parseqs = __webpack_require__(6);
+var debug = __webpack_require__(6)('socket.io-client:socket');
+var parseqs = __webpack_require__(7);
 var hasBin = __webpack_require__(25);
 
 /**
@@ -6392,6 +6400,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__js_user_adminFunctions__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__js_dom_objects__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__js_dom_functions__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__js_user_prototype__ = __webpack_require__(10);
 /*
 https://github.com/mysqljs/mysql
 https://www.getdonedone.com/building-the-optimal-user-database-model-for-your-application/
@@ -6400,6 +6409,7 @@ https://medium.com/@kimtnguyen/relational-database-schema-design-overview-70e447
 
 
  // for broad variables
+
 
 
 
@@ -6473,11 +6483,17 @@ var init = function init() {
     WEB SOCKETS
 */
 
-var io = __webpack_require__(10);
+var io = __webpack_require__(5);
 var socket = io.connect("http://127.0.0.1:8081");
 
 socket.on('connect', function () {
     socket.emit('connected', "A Client has Connected");
+
+    /*
+        All this is for testing / debugging right now
+    */
+
+    // Admin.createUser('kmetroid','password');
 
     __WEBPACK_IMPORTED_MODULE_4__js_dom_functions__["a" /* default */].populateUsersDropdown().then(function (data) {
         console.log(data);
@@ -6485,6 +6501,7 @@ socket.on('connect', function () {
             // store.getCurrentUser().createPost('title','sub','content');
         });
     });
+
     // store.getUsers();
 
 
@@ -8863,7 +8880,7 @@ module.exports = __webpack_amd_options__;
  */
 
 var parseuri = __webpack_require__(18);
-var debug = __webpack_require__(5)('socket.io-client:url');
+var debug = __webpack_require__(6)('socket.io-client:url');
 
 /**
  * Module exports.
@@ -10030,11 +10047,11 @@ module.exports.parser = __webpack_require__(1);
 
 var transports = __webpack_require__(23);
 var Emitter = __webpack_require__(0);
-var debug = __webpack_require__(8)('engine.io-client:socket');
+var debug = __webpack_require__(9)('engine.io-client:socket');
 var index = __webpack_require__(27);
 var parser = __webpack_require__(1);
 var parseuri = __webpack_require__(18);
-var parseqs = __webpack_require__(6);
+var parseqs = __webpack_require__(7);
 
 /**
  * Module exports.
@@ -10808,8 +10825,8 @@ try {
 var XMLHttpRequest = __webpack_require__(15);
 var Polling = __webpack_require__(24);
 var Emitter = __webpack_require__(0);
-var inherit = __webpack_require__(7);
-var debug = __webpack_require__(8)('engine.io-client:polling-xhr');
+var inherit = __webpack_require__(8);
+var debug = __webpack_require__(9)('engine.io-client:polling-xhr');
 
 /**
  * Module exports.
@@ -11956,7 +11973,7 @@ function coerce(val) {
  */
 
 var Polling = __webpack_require__(24);
-var inherit = __webpack_require__(7);
+var inherit = __webpack_require__(8);
 
 /**
  * Module exports.
@@ -12203,10 +12220,10 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 
 var Transport = __webpack_require__(16);
 var parser = __webpack_require__(1);
-var parseqs = __webpack_require__(6);
-var inherit = __webpack_require__(7);
+var parseqs = __webpack_require__(7);
+var inherit = __webpack_require__(8);
 var yeast = __webpack_require__(26);
-var debug = __webpack_require__(8)('engine.io-client:websocket');
+var debug = __webpack_require__(9)('engine.io-client:websocket');
 var BrowserWebSocket, NodeWebSocket;
 if (typeof self === 'undefined') {
   try {

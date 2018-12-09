@@ -22,17 +22,18 @@ export default function User(username,password,date_created,comments,comment_upv
         }
     } else {
         this.date_created = new Date();
-        this.comments = [];
+        this.comments = "[]";
         this.comment_votes = {
-            up   : [],
-            down : []
+            up   : "[]",
+            down : "[]"
         }
-        this.posts = [];
+        this.posts = "[]";
         this.post_votes = {
-            up   : [],
-            down : []
+            up   : "[]",
+            down : "[]"
         }
     }
+    // store.addUser(this);
 }
 
 User.prototype = {
@@ -48,7 +49,7 @@ User.prototype = {
                 user: store.getCurrentUser().username,
                 content: content,
                 subreddit: subreddit,
-                comments: []
+                comments: '[]'
             }
             // this.posts.push(post);
             console.log('the post',post);

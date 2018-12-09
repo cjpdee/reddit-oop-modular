@@ -88,7 +88,48 @@ io.on('connection', client => {
 		"')", function(err, result) {
 			if(err) throw err;
 			console.log(result);
-			client.emit('userCreateNewPost');
+
+			let postsStr;
+			con.query("SELECT posts FROM users WHERE username = '" + data.user + "'",function(err,result) {
+				console.log('here is your result you asked for:');
+				console.log(result[0].posts);
+				postsStr = result[0].posts;
+
+
+				console.log(postsStr);
+
+				if((postsStr.endsWith(']')) && (postsStr.startsWith('['))) {
+					var thing = ',';
+					if (postsStr.length == 2) {
+						thing = '';
+					}
+					console.log(postsStr);
+					// postsArray = "[" + postsStr + "]";
+					// console.log(postsArray);
+					postsStr = postsStr.replace('[','');
+					postsStr = postsStr.replace(']','');
+					var postsArray = "[" + postsStr + thing + data.post_id + "]";
+					console.log(postsArray);
+					// postsArray.push(data.post_id);
+
+					console.log('posts array: ' + postsArray);
+
+					con.query("UPDATE users SET posts = '" + postsArray + "' WHERE username = '" + data.user + "'",function(err,result) {
+						if (err) throw err;
+						console.log('emitting thingy',result);
+						client.emit('userCreateNewPost');
+					})
+
+				} else {
+					console.log('The database returned an incorrectly written posts array : ',postsStr);
+				}
+
+
+				
+			})
+			
+
+			
 		});
 	})
 

@@ -8,7 +8,15 @@ var socket = io.connect("http://127.0.0.1:8081");
 export default (function() {
 var Admin = {
     createUser : function(username,password) {
-        store.getUsers().push(new User(username,password));
+            store.getUsers()
+            .then(function(data) {
+                console.log(data);
+                // let usersArray = Array.parse(data);
+
+                let x = new User(username,password);
+                store.addUser(x);
+                resolve();
+            })
     },
     
     findUser : function(username) {

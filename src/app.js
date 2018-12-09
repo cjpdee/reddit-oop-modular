@@ -11,6 +11,7 @@ import Admin from './js/user_adminFunctions';
 import DOMponents from './js/dom_objects';
 import DOMFuncs from './js/dom_functions';
 import dom_functions from './js/dom_functions';
+import User from './js/user_prototype';
 
 
 // Admin.createUser("myUser","myPass");
@@ -90,14 +91,21 @@ var socket = io.connect("http://127.0.0.1:8081");
 socket.on('connect', function() {
     socket.emit('connected', "A Client has Connected");
 
+    /*
+        All this is for testing / debugging right now
+    */
+
+    // Admin.createUser('kmetroid','password');
+
     DOMFuncs.populateUsersDropdown().then(function(data){
         console.log(data)
         store.setCurrentUser("charlie")
             .then( function() {
                 // store.getCurrentUser().createPost('title','sub','content');
-            } )
-        
+            })
     })
+
+    
     // store.getUsers();
     
 

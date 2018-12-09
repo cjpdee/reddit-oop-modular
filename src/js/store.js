@@ -44,8 +44,8 @@ var store = {
             });
         }) 
     },
-    addUser : function() {
-        new Promise(function(user) { // complete-ish
+    addUser : function(user) {
+        new Promise(function() { // complete-ish
             socket.emit('newUser',user);
 
             socket.on('newUser',function(data) {
