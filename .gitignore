@@ -1,4 +1,8 @@
+.gitignore
 /node_modules
 *.log
 /*.log
 /dist/sensitive.js
+/dist/app.js
+/dist/app.css
+/dist/index.html
