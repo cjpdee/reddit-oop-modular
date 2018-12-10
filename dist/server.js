@@ -21,7 +21,7 @@ con.connect(function(err) {
 	console.log('Connected to SQL Database.');
 	con.query("SELECT * FROM users", function (err, result, fields) {
 		if (err) throw err;
-		console.log(result);
+		// console.log(result);
 	});
 });
 
@@ -69,7 +69,8 @@ io.on('connection', client => {
 			data.post_votes.down +
 		"')", function (err, result, fields) {
 			if (err) throw err;
-			console.log(result);
+			// console.log(result);
+			console.log("User '" + data.username + "' saved to database.");
 		});
 	});
 
@@ -87,23 +88,25 @@ io.on('connection', client => {
 			data.downvotes +
 		"')", function(err, result) {
 			if(err) throw err;
-			console.log(result);
+			// console.log(result);
+			console.log("New post created with title : " + data.title);
 
-			let postsStr;
+			// create query functions : query.updatePosts(username,new_post_id)
+			// query.updateComments()
+			// query.updateCommentUpvotes()
+			// etc...
+
 			con.query("SELECT posts FROM users WHERE username = '" + data.user + "'",function(err,result) {
-				console.log('here is your result you asked for:');
-				console.log(result[0].posts);
-				postsStr = result[0].posts;
-
-
-				console.log(postsStr);
+				// console.log(result[0].posts);
+				let postsStr = result[0].posts;
+				// console.log(postsStr);
 
 				if((postsStr.endsWith(']')) && (postsStr.startsWith('['))) {
 					var thing = ',';
 					if (postsStr.length == 2) {
 						thing = '';
 					}
-					console.log(postsStr);
+					console.log("Author's posts array before update:" + postsStr);
 					// postsArray = "[" + postsStr + "]";
 					// console.log(postsArray);
 					postsStr = postsStr.replace('[','');
@@ -112,12 +115,12 @@ io.on('connection', client => {
 					console.log(postsArray);
 					// postsArray.push(data.post_id);
 
-					console.log('posts array: ' + postsArray);
+					console.log("Author' s posts array after update: " + postsArray);
 
 					con.query("UPDATE users SET posts = '" + postsArray + "' WHERE username = '" + data.user + "'",function(err,result) {
 						if (err) throw err;
-						console.log('emitting thingy',result);
-						client.emit('userCreateNewPost');
+						// console.log('emitting thingy',result);
+						client.emit('userCreateNewPost',data);
 					})
 
 				} else {
@@ -143,22 +146,18 @@ io.on('connection', client => {
 	// getUsers
 
 	client.on('getUsers',function() {
-		let data;
 		return con.query("SELECT * from users", function(err, result, fields) {
 			if (err) throw err;
-			// console.log(result);
-
 			client.emit('getUsers',result);
 			return result;
 		})
-		// return data;
 	})
 
 	// ------------
 	// getPostCount
 
 	client.on('getPostCount', function() {
-		con.query("SELECT value FROM store WHERE name='post_count'", function (err, result, fields) {
+		con.query("SELECT value FROM store WHERE name='post_count'", function (err, result) {
 			if (err) throw err;
 			console.log("client retrieved post_count from db");
 			client.emit('getPostCount',result[0].value);
@@ -224,8 +223,8 @@ io.on('connection', client => {
 
 	client.on('getThisPost',function(data) {
 		con.query("SELECT * FROM posts WHERE 'post_id' = '" + data + "'",function(err,result) {
-			console.log(result);
-			client.emit('getThisPost',result);
+			console.log('GETHISPOS',result);
+			client.emit('getThisPost',data);
 		});
 	});
 
@@ -236,6 +235,5 @@ io.on('connection', client => {
 
 
 server.listen(8081);
- 
- // Console will print the message
- console.log('Server running at http://127.0.0.1:8081/');
+
+console.log('Server running at http://127.0.0.1:8081/');

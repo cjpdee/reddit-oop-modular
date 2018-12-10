@@ -6,9 +6,20 @@ import store from './store';
 // function sortPosts(sortType) {}
 var DOMFuncs;
 export default DOMFuncs = {
-    drawAllPosts : function(sortedPosts) {
+    drawAllPosts : function() {
+        Admin.getAllPosts().then(function(data) {
+            console.log(data)
+            data.forEach(function(post) {
+                
+                DOMponents.insertTop(DOMponents.drawPostFromObject(post));
+            });
+        })
+    },
+    drawThesePosts : function(sortedPosts) {
         sortedPosts.forEach(function(post) {
-            DOMponents.insertTop(DOMponents.drawPost(post.post_id));
+            DOMponents.drawPost(post.post_id).then(function(data) {
+                DOMponents.insertTop(data);
+            })
         });
     },
 

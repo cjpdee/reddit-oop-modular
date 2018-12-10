@@ -1,9 +1,10 @@
-import DOMFuncs from './dom_functions';
+// import DOMFuncs from './dom_functions';
 import User from './user_prototype';
 
 
 var io = require('socket.io-client');
 var socket = io.connect("http://127.0.0.1:8081");
+
 
 
 var post_count = 1;
@@ -12,6 +13,10 @@ var users = [];
 var currentUser;
 
 var store = {
+    getSocket: function() {
+        console.log('app.js',socket);
+        return socket
+    },
     // USER
     getUsers : function() {
         return new Promise(function(resolve,reject) {

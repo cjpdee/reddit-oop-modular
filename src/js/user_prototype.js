@@ -1,8 +1,11 @@
 import store from './store';
 import Admin from './user_adminFunctions';
+import DOMPonents from './dom_objects';
 
-var io = require('socket.io-client');
-var socket = io.connect("http://127.0.0.1:8081");
+// console.log(store)
+// store.startSocket();
+// var socket = store.getSocket()
+
 
 // User Constructor
 export default function User(username,password,date_created,comments,comment_upvotes,comment_downvotes,posts,post_upvotes,post_downvotes) {
@@ -33,6 +36,7 @@ export default function User(username,password,date_created,comments,comment_upv
             down : "[]"
         }
     }
+    // console.log(store);
     // store.addUser(this);
 }
 
@@ -40,7 +44,7 @@ User.prototype = {
     createPost : function(subreddit,title,content) {
         store.getPostCount().then(function(data) {
             console.log('get',data);
-            let post = {
+            var post = {
                 post_id: data,
                 date_posted: new Date(),
                 upvotes: 0,
@@ -50,15 +54,22 @@ User.prototype = {
                 content: content,
                 subreddit: subreddit,
                 comments: '[]'
-            }
+            };
             // this.posts.push(post);
             console.log('the post',post);
-            socket.emit('userCreateNewPost',post);
+            store.getSocket().emit('userCreateNewPost',post);
 
-
-            socket.on('userCreateNewPost',function() {
-                console.log()
+            // this needs moving so it's only called once
+            store.getSocket().on('userCreateNewPost',function(data) {
+                console.log('UCNP',data);
+                // store.parse(data)
+                // turn the return into a regular old object
                 store.incrementPostCount();
+                DOMPonents.drawPost(data).then(function(data) {
+                    console.log($(data));
+                    DOMPonents.insertTop($(data));
+                    store.getSocket().off('userCreateNewPost');
+                })
             })
 
             

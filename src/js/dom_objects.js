@@ -24,41 +24,45 @@ export default DOMponents = {
             DOMponents.insertTop(DOMponents.drawPost(thisPostId));
         }
     },
-    drawPost : function(post_id) {
-        var post = Admin.getThisPost(post_id);
-
-        let renderedPost = $(`
-            <div class="post" data-post-id="${post.post_id}">
+    drawPostFromObject : function(data) {
+        var commentsArray;
+        var date = new Date( data.date_posted );
+        if(data.comments) {
+            commentsArray = new Array(data.comments).map(comment => (
+                `<span><strong>` + comment.user + `: </strong>` + comment.content + `</span>`
+            )).join('<br />')
+        }
+        console.log(data);
+        return $(`
+            <div class="post" data-post-id="${data.post_id}">
                 <div class="post__votes__wrap">
-                    <button class="post__votes__upvote" post-js="upvote">${post.upvotes}</button>
-                    <button class="post__votes__downvote" post-js="downvote">${post.downvotes}</button>
+                    <button class="post__votes__upvote" post-js="upvote">${data.upvotes}</button>
+                    <button class="post__votes__downvote" post-js="downvote">${data.downvotes}</button>
                 </div>
                 <div class="post__main">
-                    <h3 class="post__header">${post.title}</h3>
+                    <h3 class="post__header">${data.title}</h3>
                     <div class="post__details">
-                        <span class="post__detail">${post.subreddit}</span>
-                        <span class="post__detail">${post.user}</span>
+                        <span class="post__detail">${data.subreddit}</span>
+                        <span class="post__detail">${data.user}</span>
                         <span class="post__detail">Date posted: 
-                            ${post.date_posted.getDate()}.${post.date_posted.getMonth()}.${post.date_posted.getFullYear()}
+                            ${date.getDate()}.${date.getMonth()}.${date.getFullYear()}
                             at 
-                            ${post.date_posted.getHours()}:${post.date_posted.getMinutes()}
+                            ${date.getHours()}:${date.getMinutes()}
                         </span>
                     </div>
                     <div class="post__controls">
                         <span>
-                            <label for="showPost-${post.post_id}">Show Post</label>
-                            <input type="checkbox" name="showPost" id="showPost-${post.post_id}">
+                            <label for="showPost-${data.post_id}">Show Post</label>
+                            <input type="checkbox" name="showPost" id="showPost-${data.post_id}">
                             <div class="post__content">
-                                ${post.content}
+                                ${data.content}
                                 <div>
-                                    <label for="showComments-${post.post_id}">Show Comments</label>
-                                    <input type="checkbox" name="showComments" id="showComments-${post.post_id}">
+                                    <label for="showComments-${data.post_id}">Show Comments</label>
+                                    <input type="checkbox" name="showComments" id="showComments-${data.post_id}">
                                     <button class="post__controls__btn" post-js="create-comment">Post Comment</button>
                                     <div class="post__comments">
                                         ${
-                                            post.comments.map(comment => (
-                                                `<span><strong>` + comment.user + `: </strong>` + comment.content + `</span>`
-                                            )).join('<br />')
+                                            commentsArray
                                         }
                                     </div>
                                 </div>
@@ -67,8 +71,67 @@ export default DOMponents = {
                     </div>
                 </div>
             </div>
-        `);
-        return renderedPost
+        `)
+    },
+    drawPost : function(post_id) {
+        return new Promise(function(resolve) {
+            Admin.getThisPost(post_id).then(function(data) {
+                if(data.username) {
+                    data.user = data.username;
+                }
+                var date = new Date( data.date_posted );
+                console.log('instance of data',data)
+                console.log(date)
+                var commentsArray;
+                if(data.comments) {
+                    commentsArray = new Array(data.comments).map(comment => (
+                        `<span><strong>` + comment.user + `: </strong>` + comment.content + `</span>`
+                    )).join('<br />')
+                }
+                resolve( $(`
+                    <div class="post" data-post-id="${data.post_id}">
+                        <div class="post__votes__wrap">
+                            <button class="post__votes__upvote" post-js="upvote">${data.upvotes}</button>
+                            <button class="post__votes__downvote" post-js="downvote">${data.downvotes}</button>
+                        </div>
+                        <div class="post__main">
+                            <h3 class="post__header">${data.title}</h3>
+                            <div class="post__details">
+                                <span class="post__detail">${data.subreddit}</span>
+                                <span class="post__detail">${data.user}</span>
+                                <span class="post__detail">Date posted: 
+                                    ${date.getDate()}.${date.getMonth()}.${date.getFullYear()}
+                                    at 
+                                    ${date.getHours()}:${date.getMinutes()}
+                                </span>
+                            </div>
+                            <div class="post__controls">
+                                <span>
+                                    <label for="showPost-${data.post_id}">Show Post</label>
+                                    <input type="checkbox" name="showPost" id="showPost-${data.post_id}">
+                                    <div class="post__content">
+                                        ${data.content}
+                                        <div>
+                                            <label for="showComments-${data.post_id}">Show Comments</label>
+                                            <input type="checkbox" name="showComments" id="showComments-${data.post_id}">
+                                            <button class="post__controls__btn" post-js="create-comment">Post Comment</button>
+                                            <div class="post__comments">
+                                                ${
+                                                    commentsArray
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `)
+                );
+            })
+        })
+        
+        
     },
 
 
@@ -90,7 +153,8 @@ export default DOMponents = {
                     </div>
                 </section>
             `));
-            $(`[modal-js=submit-post]`).on('click',function(e){
+            $(`[modal-js=submit-post]`).one('click',function(e){
+                console.log('SUBMITTING POST')
                 DOMponents.NewPostModal.submit(e);
             });
         },
@@ -124,7 +188,7 @@ export default DOMponents = {
                     </div>
                 </section>
             `));
-            $(`[modal-js=submit-comment]`).on('click',function(e) {
+            $(`[modal-js=submit-comment]`).one('click',function(e) {
                 e.preventDefault();
                 DOMponents.NewCommentModal.submit(post);
             });
@@ -157,7 +221,7 @@ export default DOMponents = {
                     </div>
                 </section>
             `));
-            $(`[modal-js=submit-user]`).on('click',function(e) {
+            $(`[modal-js=submit-user]`).one('click',function(e) {
                 e.preventDefault();
                 DOMponents.NewUserModal.submit();
             });

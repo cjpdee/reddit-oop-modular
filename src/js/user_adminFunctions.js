@@ -1,8 +1,9 @@
 import store from './store';
 import User from './user_prototype';
+import Post from './post_prototype';
 
-var io = require('socket.io-client');
-var socket = io.connect("http://127.0.0.1:8081");
+// var socket = store.getSocket();
+// console.log(store);
 
 // admin functions
 export default (function() {
@@ -29,16 +30,25 @@ var Admin = {
         return new Promise(function(resolve) {
             // example at store.js
 
-            socket.emit('getAllPosts');
-            socket.on('getAllPosts',function(data) {
-                console.log(data);
+            store.getSocket().emit('getAllPosts');
+            store.getSocket().on('getAllPosts',function(data) {
+                console.log('ALL POSTS: ',data);
+                let posts = [];
+                data.forEach(function(item) {
+                    item.date_posted = new Date(item.date_posted);
+                    console.log(data.comments);
+                    let newPost = new Post(item.post_id,item.date_posted,item.title,item.user,item.subreddit,item.content,item.upvotes,item.downvotes,item.comments);
+                    posts.push(newPost);
+                })
+                console.log('after: ',posts);
+
                 // data.forEach(function(item){
                 //     let newUser = new User(item.username,item.password,item.date_created,item.comments,item.comment_upvotes,item.comment_downvotes,item.posts,item.post_upvotes,item.post_downvotes);
                 //     users.push(newUser)
                 // })
                 // console.log('-- getUsers');
                 // console.log(users);
-                resolve(data);
+                resolve(posts);
             });
 
             // let allPosts = [];
@@ -54,8 +64,8 @@ var Admin = {
     // currently working on
     getThisPost : function(post_id) {
         return new Promise(function(resolve) {
-            socket.emit('getThisPost',post_id);
-            socket.on('getThisPost',function(data) {
+            store.getSocket().emit('getThisPost',post_id);
+            store.getSocket().on('getThisPost',function(data) {
                 console.log(data);
                 resolve(data);
             });

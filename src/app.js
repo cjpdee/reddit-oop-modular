@@ -3,8 +3,6 @@ https://github.com/mysqljs/mysql
 https://www.getdonedone.com/building-the-optimal-user-database-model-for-your-application/
 https://medium.com/@kimtnguyen/relational-database-schema-design-overview-70e447ff66f9
 */
-
-
 import $ from './js/jquery';
 import store from './js/store'; // for broad variables
 import Admin from './js/user_adminFunctions';
@@ -14,20 +12,7 @@ import dom_functions from './js/dom_functions';
 import User from './js/user_prototype';
 
 
-// Admin.createUser("myUser","myPass");
-//Admin.createUser("myG","myPass");
-// store.setCurrentUser("myG");
-// let currentUser = Admin.findUser("myG");
-//currentUser.createPost('a-sub','My G\'s Post','What\'s up all the gs of the world');
-// currentUser.createPost('b-sub','Gs','yes my g');
-// currentUser.createComment(1,'comment data');
-// currentUser.createComment(1,'my g this is sick');
-// currentUser.createComment(2,'commf dfsds2');
-
-
-var init = function() {
-    //DOMFuncs.populateUsersDropdown();
-    // DOMFuncs.drawAllPosts(store.getUsers());
+var initEventListeners = function() {
 
     $("[hook-js=select-user]").on("change",function() {
         store.setCurrentUser(this.value);
@@ -77,6 +62,7 @@ var init = function() {
         return false;
     });
 
+
     
 }
 
@@ -84,61 +70,36 @@ var init = function() {
     WEB SOCKETS
 */
 
-var io = require('socket.io-client');
-var socket = io.connect("http://127.0.0.1:8081");
+
+store.getSocket().on('connect', function() {
+    store.getSocket().emit('connected', "A Client has Connected");
 
 
-socket.on('connect', function() {
-    socket.emit('connected', "A Client has Connected");
+    
 
     /*
         All this is for testing / debugging right now
     */
 
-    // Admin.createUser('kmetroid','password');
+    // Admin.createUser('charlie','password');
 
     DOMFuncs.populateUsersDropdown().then(function(data){
         console.log(data)
         store.setCurrentUser("charlie")
             .then( function() {
-                // store.getCurrentUser().createPost('title','sub','content');
+                DOMFuncs.drawAllPosts();
             })
     })
-
-    
-    // store.getUsers();
-    
-
-    
-
-    // Admin.getAllPosts()
-    //     .then(function(data){
-    //         console.log(data);
-    //         Admin.getThisPost(53).then(function(bata) {
-    //             console.log(bata);
-    //         })
-    //         // DOMFuncs.drawAllPosts(data);
-    //     })
-    // // DOMFuncs.drawAllPosts();
-
-    // Admin.getThisPost(53).then(function(bata) {
-    //     console.log(bata);
-    // })
-    
-    // store.getUsers();
-
-    // .then(function(){
-    //     console.log('hello!');
-    // })
-    // DOMFuncs.populateUsersDropdown();
 });
+
+
 
 
 
 $("[hook-js=test]").on("click",function() {
     console.log("button pressed")
-    socket.emit('request', 'a request'); // emit an event to the socket
-    socket.on('reply', () => { console.log("got reply") }); // listen to the event
+    store.getSocket().emit('request', 'a request'); // emit an event to the socket
+    store.getSocket().on('reply', () => { console.log("got reply") }); // listen to the event
 })
 
 
@@ -153,4 +114,4 @@ $("[hook-js=test]").on("click",function() {
 
 
 
-init();
+initEventListeners();
