@@ -81,23 +81,30 @@ User.prototype = {
         this.posts.pop(post_id)
     },
     createComment : function(post_id,content) {
-        let comment = {
-            user: this.username,
-            comment_id: store.getCommentCount(),
-            post_id: post_id,
-            date_posted: new Date(),
-            upvotes: 0,
-            downvotes: 0,
-            content: content,
-            subreddit: Admin.getThisPostSub(post_id)
-        }
-        // commit comment to user
-        this.comments.push(comment);
-        store.incrementCommentCount();
-
-        // pass this comment to the post it's linked to
-        Admin.getThisPost(post_id).comments.push(comment);
-        return comment.comment_id
+        return new Promise(function(resolve) {
+            let comment;
+            // commit comment to user
+            // this.comments.push(comment);
+            Admin.getThisPost(post_id).then(function(data) {
+                console.log(data);
+                comment = {
+                    user: User.username,
+                    comment_id: store.getCommentCount(),
+                    post_id: data.post_id,
+                    date_posted: new Date(),
+                    upvotes: 0,
+                    downvotes: 0,
+                    content: content,
+                    subreddit: data.subreddit
+                }
+                console.log(comment.user)
+                store.incrementCommentCount();
+                resolve(comment.comment_id);
+            })
+    
+            // pass this comment to the post it's linked to
+            // Admin.getThisPost(post_id).comments.push(comment);
+        })
     },
     downvotePost : function(post_id) {
         if (this.votes.down.find(downvotedPost => downvotedPost == post_id)) {

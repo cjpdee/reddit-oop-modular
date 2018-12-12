@@ -5,10 +5,6 @@ import User from './user_prototype';
 var io = require('socket.io-client');
 var socket = io.connect("http://127.0.0.1:8081");
 
-
-
-var post_count = 1;
-var comment_count = 0;
 var users = [];
 var currentUser;
 
@@ -27,8 +23,6 @@ var store = {
                     let newUser = new User(item.username,item.password,item.date_created,item.comments,item.comment_upvotes,item.comment_downvotes,item.posts,item.post_upvotes,item.post_downvotes);
                     users.push(newUser)
                 })
-                console.log('-- getUsers');
-                console.log(users);
                 resolve(users);
             });
         })

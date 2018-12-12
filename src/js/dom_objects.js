@@ -52,7 +52,7 @@ export default DOMponents = {
                     </div>
                     <div class="post__controls">
                         <span>
-                            <label for="showPost-${data.post_id}">Show Post</label>
+                            <label class="post__show-post" for="showPost-${data.post_id}">Show Post</label>
                             <input type="checkbox" name="showPost" id="showPost-${data.post_id}">
                             <div class="post__content">
                                 ${data.content}
@@ -107,7 +107,7 @@ export default DOMponents = {
                             </div>
                             <div class="post__controls">
                                 <span>
-                                    <label for="showPost-${data.post_id}">Show Post</label>
+                                    <label class="post__show-post" for="showPost-${data.post_id}">Show Post</label>
                                     <input type="checkbox" name="showPost" id="showPost-${data.post_id}">
                                     <div class="post__content">
                                         ${data.content}
@@ -195,13 +195,15 @@ export default DOMponents = {
         },
 
         submit : function(post) {
+            console.log('ello',post);      
             store.getCurrentUser().createComment(
                 post.post_id,
                 $("#content").val()
-            );
+            ).then(function() {
+                $(`[modal-js=modal]`).remove();
+                DOMponents.reinsert(`[data-post-id=${post.post_id}]`);
+            })
 
-            $(`[modal-js=modal]`).remove();
-            DOMponents.reinsert(`[data-post-id=${post.post_id}]`);
         }
     },
 

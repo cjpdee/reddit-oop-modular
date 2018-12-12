@@ -64,16 +64,13 @@ var Admin = {
     // currently working on
     getThisPost : function(post_id) {
         return new Promise(function(resolve) {
+            console.log(post_id);
             store.getSocket().emit('getThisPost',post_id);
             store.getSocket().on('getThisPost',function(data) {
                 console.log(data);
                 resolve(data);
             });
         });
-    },
-
-    getThisPostSub : function(post_id) {
-        return Admin.getAllPosts().find(post=> post.post_id == post_id).subreddit
     },
     
     getUserFromPost : function(post_id) {

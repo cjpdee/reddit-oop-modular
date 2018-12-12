@@ -3,7 +3,9 @@
 }
 
 %voteButton {
+    display: block;
     flex: 1 0 50%;
+    border: none;
     font-weight: 900;
 }
 
@@ -16,22 +18,61 @@ body {
 
 .controls {
     &__wrap {
+        position: relative;
         padding: em(10) em(20);
-        background-color: darkgrey;
+        background-color: white;
+        border-bottom: em(2) solid black;
+    }
+    &__select {
+        height: 100%;
+        width: 100%;
+        padding-left: em(5);
+        background-color: transparent;
+        border: none;
+        font-weight: bold;
+
+        &__wrap {
+            position: relative;
+            display: inline-block;
+            height: em(35);
+            width: em(100);
+            background-color: white;
+            border: em(2) solid black;
+        }
     }
     &__btn {
-        background-color: lightgrey;
-        color: white;
+        background-color: white;
+        color: black;
+        border: em(2) solid black;
+        padding: em(10);
+        font-weight: bold;
+        &--new-post {
+            background-color: rgb(68, 158, 68);
+            color: white;
+            border: em(2) solid rgb(68, 158, 68);
+            border-radius: em(3);
+            padding: em(10);
+            font-weight: bold;
+        }
+        &--new-user {
+            background-color: rgb(233, 162, 29);
+            color: white;
+            border: em(2) solid rgb(230, 154, 14);
+            border-radius: em(3);
+            padding: em(10);
+            font-weight: bold;
+        }
     }
 }
 
 .display__wrap {
     height: 100%;
-    background-color: #f4f4f4;
+    background-color: #f3f3f3;
     padding: em(20);
 }
 
 .post {
+    position: relative;
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
@@ -39,19 +80,21 @@ body {
 
     &__votes {
         &__wrap {
+            // position: relative;
             flex: 0 0 em(64);
-            height: em(64);
+            height: em(87);
             display: flex;
             flex-direction: column;
         }
 
         &__upvote {
             @extend %voteButton;
-            background-color: orange;
+            background-color: rgb(255, 188, 64);
         }
         &__downvote {
             @extend %voteButton;
-            background-color: blue;
+            background-color: rgb(88, 88, 197);
+            color: black;
         }
     }
 
@@ -78,14 +121,44 @@ body {
             display: block;
         }
     }
+
+    &__show-post {
+        position: relative;
+        display: inline-block;
+        background-color: white;
+        border: em(1) solid black;
+        padding: em(3);
+        margin-top: em(2);
+
+        & + input {
+            
+        }
+    }
 }
 
+
+
 .modal {
-    padding: em(50);
+    padding: em(30) em(50);
 
     background-color: white;
-    border: em(3) solid black;
+    // border: em(3) solid black;
     border-radius: em(10);
+
+    & input,textarea {
+        margin: 0 0 em(10) 0;
+        border: none;
+        font-size: em(22);
+        &:focus { outline: none; }
+        &#title {
+            font-size: em(30);
+        }
+        &#sub {
+            font-size:em(22);
+        }
+    }
+
+    & textarea { font-size: em(18); }
 
     &__wrap {
         position: fixed;

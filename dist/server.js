@@ -53,7 +53,10 @@ app.get('/app.js', function(req, res, next) {
 */
 
 io.on('connection', client => {
-	client.on('request', data => { console.log(data); });
+
+	client.on('consoleLog',data => {
+		console.log('Logging your data: ' + data);
+	})
 
 	// --------
 	// NEW USER
@@ -125,14 +128,8 @@ io.on('connection', client => {
 
 				} else {
 					console.log('The database returned an incorrectly written posts array : ',postsStr);
-				}
-
-
-				
+				}	
 			})
-			
-
-			
 		});
 	})
 
@@ -216,14 +213,14 @@ io.on('connection', client => {
 	client.on('getAllPosts',function() {
 		con.query("SELECT * FROM posts", function(err,result) {
 			if (err) throw err;
-			console.log('retrieved all posts',result);
+			// console.log('retrieved all posts',result);
 			client.emit('getAllPosts',result);
 		});
 	});
 
 	client.on('getThisPost',function(data) {
 		con.query("SELECT * FROM posts WHERE 'post_id' = '" + data + "'",function(err,result) {
-			console.log('GETHISPOS',result);
+			// console.log('Rete',result);
 			client.emit('getThisPost',data);
 		});
 	});

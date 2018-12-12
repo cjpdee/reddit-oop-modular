@@ -1,8 +1,3 @@
-/*
-https://github.com/mysqljs/mysql
-https://www.getdonedone.com/building-the-optimal-user-database-model-for-your-application/
-https://medium.com/@kimtnguyen/relational-database-schema-design-overview-70e447ff66f9
-*/
 import $ from './js/jquery';
 import store from './js/store'; // for broad variables
 import Admin from './js/user_adminFunctions';
@@ -74,9 +69,6 @@ var initEventListeners = function() {
 store.getSocket().on('connect', function() {
     store.getSocket().emit('connected', "A Client has Connected");
 
-
-    
-
     /*
         All this is for testing / debugging right now
     */
@@ -84,23 +76,13 @@ store.getSocket().on('connect', function() {
     // Admin.createUser('charlie','password');
 
     DOMFuncs.populateUsersDropdown().then(function(data){
-        console.log(data)
+        // console.log(data)
         store.setCurrentUser("charlie")
             .then( function() {
                 DOMFuncs.drawAllPosts();
             })
     })
 });
-
-
-
-
-
-$("[hook-js=test]").on("click",function() {
-    console.log("button pressed")
-    store.getSocket().emit('request', 'a request'); // emit an event to the socket
-    store.getSocket().on('reply', () => { console.log("got reply") }); // listen to the event
-})
 
 
 
