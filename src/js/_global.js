@@ -10,7 +10,6 @@
 $("[hook-js=select-user]").on('change',function(e) {
     let thisUserName = $(e.currentTarget).val();
     currentUser = users.find(user => user.username == thisUserName);
-    console.log(currentUser);
 });
 
 $("[hook-js=new-post]").on('click',function() {

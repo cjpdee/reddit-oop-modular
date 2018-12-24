@@ -36,14 +36,11 @@ export default function User(username,password,date_created,comments,comment_upv
             down : "[]"
         }
     }
-    // console.log(store);
-    // store.addUser(this);
 }
 
 User.prototype = {
     createPost : function(subreddit,title,content) {
         store.getPostCount().then(function(data) {
-            console.log('get',data);
             var post = {
                 post_id: data,
                 date_posted: new Date(),
@@ -55,8 +52,6 @@ User.prototype = {
                 subreddit: subreddit,
                 comments: '[]'
             };
-            // this.posts.push(post);
-            console.log('the post',post);
             store.getSocket().emit('userCreateNewPost',post);
 
             // this needs moving so it's only called once
@@ -71,9 +66,6 @@ User.prototype = {
                     store.getSocket().off('userCreateNewPost');
                 })
             })
-
-            
-            console.log('heres my post',post)
             return post
         });
     },
@@ -86,7 +78,6 @@ User.prototype = {
             // commit comment to user
             // this.comments.push(comment);
             Admin.getThisPost(post_id).then(function(data) {
-                console.log(data);
                 comment = {
                     user: User.username,
                     comment_id: store.getCommentCount(),
@@ -121,15 +112,30 @@ User.prototype = {
     },
     // User.upvote('post',1)
     upvote : function(type,thing_id) {
-        if (this.votes.up.find(upvoted => upvoted == thing_id)) {
+
+        let thisThing;
+        
+
+        console.log(this.post_votes);
+        if (this.post_votes.find(upvoted => upvoted == thing_id)) {
             console.log("this user has already voted on this " + type);
             return
         } else {
-            let thisThing;
-            switch (type) {
-                case 'post'    : thisThing = Admin.getThisPost(thing_id); break
-                case 'comment' : thisThing = Admin.getThisComment(thing_id); break
+            function doesNotExist() {
+                if(!thisThing){
+                    console.log(`That ${type} doesn't exist!`);
+                    return
+                }
             }
+
+            switch (type) {
+                case 'post'    :
+                    thisThing = Admin.getThisPost(thing_id).then(doesItExist())
+                    break
+                case 'comment' :
+                    thisThing = Admin.getThisComment(thing_id).then(doesItExist())
+                    break
+            }    
             if(!thisThing) {
                 console.log(`That ${type} doesn't exist!`);
                 return

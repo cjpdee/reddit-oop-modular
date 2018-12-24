@@ -28,13 +28,14 @@ var initEventListeners = function() {
         DOMponents.NewCommentModal.draw(thisPost);
     })
 
-    $("[hook-js=display]").on("click","[post-js=upvote]",function() {
+    $("[hook-js=display]").on("click","[post-js=upvote]",function(e) {
         // TO DO: check if user has up-or-downvoted on post
         // and if they have done the opposite already, remove that
         // up/downvote
+        console.log(e);
         let thisPostId = $(this).parents(".post").first().data("post-id");
         let thisPost   = Admin.getThisPost(thisPostId);
-        currentUser.upvote('post',thisPostId);
+        store.getCurrentUser().upvote('post',thisPostId);
         $(this).text(thisPost.upvotes);
     })
 
@@ -56,6 +57,8 @@ var initEventListeners = function() {
     $(document).on('click',"[modal-js=modal] > div",function(){
         return false;
     });
+
+    
 
 
     

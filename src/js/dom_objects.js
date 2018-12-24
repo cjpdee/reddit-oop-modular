@@ -153,10 +153,22 @@ export default DOMponents = {
                     </div>
                 </section>
             `));
-            $(`[modal-js=submit-post]`).one('click',function(e){
-                console.log('SUBMITTING POST')
-                DOMponents.NewPostModal.submit(e);
+            $(`[modal-js=submit-post]`).on('click',function(e){
+                console.log($("#title").val());
+                console.log($("#sub").val());
+                console.log($("#content").val());
+                 if(($("#title").val().length > 0) && ($("#sub").val().length > 0) && ($("#content").val().length >0)) {
+                     console.log('its got it all');
+                     DOMponents.NewPostModal.submit(e);
+                 }
             });
+
+            $("[modal-js=modal] textarea").on('keyup',function(e) {
+                console.log(e);
+                if(e.which==13){
+                    DOMponents.NewPostModal.submit(e);
+                }
+            })
         },
 
         submit : function(e) {
@@ -210,7 +222,7 @@ export default DOMponents = {
     NewUserModal : {
         draw : function() {
             $("body").append($(`
-                <section class="modal__wrap" data-user="${store.getCurrentUser().username}" modal-js="modal">
+                <section class="modal__wrap" modal-js="modal">
                     <div class="modal">
                         <h1>New User</h1>
                         <form onSubmit="e.preventDefault">

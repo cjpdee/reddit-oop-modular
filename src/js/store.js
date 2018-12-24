@@ -10,7 +10,6 @@ var currentUser;
 
 var store = {
     getSocket: function() {
-        console.log('app.js',socket);
         return socket
     },
     // USER
@@ -37,8 +36,7 @@ var store = {
                     }
                 }).indexOf(username);
                 currentUser = users[foundUserIndex];
-                console.log("Current user set: ",currentUser);
-                // console.log(store.getCurrentUser());
+                // console.log("Current user set: ",currentUser);
                 resolve(currentUser);
             });
         }) 
@@ -48,7 +46,7 @@ var store = {
             socket.emit('newUser',user);
 
             socket.on('newUser',function(data) {
-                console.log(data);
+                console.log('new user: ',data);
                 return data
             })
 
@@ -62,8 +60,6 @@ var store = {
             socket.emit('getPostCount');
             var postCount;
             socket.on('getPostCount', function(data) {
-                console.log("-- getPostCount --");
-                console.log(data);
                 postCount = data;
                 resolve(data);
             })
@@ -73,7 +69,6 @@ var store = {
         return new Promise(function(resolve) { // complete
             socket.emit('incrementPostCount');
             socket.on('incrementedPostCount',function(data) {
-                console.log('-- incrementPostCount : ', data);
                 resolve(data);
             });
         })
@@ -84,7 +79,6 @@ var store = {
             socket.emit('getCommentCount');
             var commentCount;
             socket.on('getCommentCount', function(data) {
-                console.log("-- getCommentCount : ", data);
                 commentCount = data;
             })
             return commentCount;
@@ -94,7 +88,6 @@ var store = {
         new Promise(function() { // complete
             socket.emit('incrementCommentCount');
             socket.on('incrementCommentCount',function(data) {
-                console.log("-- incrementCommentCount : ", data);
             })
         })
     },

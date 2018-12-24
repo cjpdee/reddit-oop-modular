@@ -33,17 +33,15 @@ con.connect(function(err) {
 
 app.get('/', function(req, res, next) {
 	res.sendFile(__dirname + '/index.html'); 
-	console.log('routed client to index');
+	console.log('routed a user to index');
 });
 
 app.get('/app.css', function(req, res, next) {
-	res.sendFile(__dirname + '/app.css'); 
-	console.log('routed client to css');
+	res.sendFile(__dirname + '/app.css');
 });
 
 app.get('/app.js', function(req, res, next) {
-	res.sendFile(__dirname + '/app.js'); 
-	console.log('routed client to js');
+	res.sendFile(__dirname + '/app.js');
 });
 
 /*
@@ -133,6 +131,10 @@ io.on('connection', client => {
 		});
 	})
 
+	client.on('upvotePost', data => {
+		console.log('upvotePost called, data: ',data);
+	}
+
 	/*
 	-----------------------
 	-------- STORE --------
@@ -156,7 +158,6 @@ io.on('connection', client => {
 	client.on('getPostCount', function() {
 		con.query("SELECT value FROM store WHERE name='post_count'", function (err, result) {
 			if (err) throw err;
-			console.log("client retrieved post_count from db");
 			client.emit('getPostCount',result[0].value);
 		});
 	});
@@ -171,7 +172,6 @@ io.on('connection', client => {
 			
 			con.query("UPDATE store SET value = '" +  incrementedValue + "' WHERE name = 'post_count'",function(err,result) {
 				if(err) throw err;
-				console.log("client incremented post_count"); 
 				client.emit('incrementPostCount',incrementedValue);
 			});
 		});
@@ -183,7 +183,6 @@ io.on('connection', client => {
 	client.on('getCommentCount', function() {
 		con.query("SELECT value FROM store WHERE name='comment_count'", function (err, result, fields) {
 			if (err) throw err;
-			console.log("client retrieved comment_count from db");
 			client.emit('getCommentCount',result[0].value)
 		});
 	});
@@ -197,7 +196,6 @@ io.on('connection', client => {
 			let incrementedValue = result[0].value++;
 			con.query("UPDATE store SET value = '" +  result[0].value + "' WHERE name = 'comment_count'",function(err,result) {
 				if(err) throw err;
-				console.log("client incremented comment_count to ", incrementedValue+1);
 				client.emit('incrementCommentCount',incrementedValue+1);
 			});
 		});
@@ -213,14 +211,12 @@ io.on('connection', client => {
 	client.on('getAllPosts',function() {
 		con.query("SELECT * FROM posts", function(err,result) {
 			if (err) throw err;
-			// console.log('retrieved all posts',result);
 			client.emit('getAllPosts',result);
 		});
 	});
 
 	client.on('getThisPost',function(data) {
 		con.query("SELECT * FROM posts WHERE 'post_id' = '" + data + "'",function(err,result) {
-			// console.log('Rete',result);
 			client.emit('getThisPost',data);
 		});
 	});

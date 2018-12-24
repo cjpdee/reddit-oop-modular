@@ -8,7 +8,6 @@ var DOMFuncs;
 export default DOMFuncs = {
     drawAllPosts : function() {
         Admin.getAllPosts().then(function(data) {
-            console.log(data)
             data.forEach(function(post) {
                 
                 DOMponents.insertTop(DOMponents.drawPostFromObject(post));
